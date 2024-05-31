@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="Batman2.Views.DevicePage"
+    xmlns:local="clr-namespace:Batman2.ViewModels"
+    x:DataType="local:DeviceViewModel"
+    xmlns:model="clr-namespace:Batman2.Models"
+    xmlns:ble="clr-namespace:Plugin.BLE.Abstractions.Contracts;assembly=Plugin.BLE.Abstractions"
+    Title="{Binding Title}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="History" Command="{Binding HistoryCommand}"
+             Order="Secondary" Priority="1" />
+        <ToolbarItem Text="Analyze" Command="{Binding AnalyzeCommand}"
+             Order="Secondary" Priority="1" />
+        <ToolbarItem Text="Demo" Command="{Binding DemoCommand}"
+            IsEnabled="{Binding canDemo, Mode=TwoWay}"
+            Order="Secondary" Priority="1" />
+        <ToolbarItem
+            Text="About" Command="{Binding AboutCommand}"
+            Order="Secondary" Priority="1"/>
+    </ContentPage.ToolbarItems>
+
+    <StackLayout>
+        <Label TextColor="Red" Text="{Binding Error}" />
+        <Label Text="Pull down to refresh scanning" HorizontalOptions="Center" />
+        <ActivityIndicator 
+            IsVisible="{Binding isConnecting}" 
+            IsRunning="{Binding isConnecting}" />
+        <RefreshView Command="{Binding LoadItemsCommand}" IsRefreshing="{Binding IsBusy, Mode=TwoWay}">
+            <CollectionView x:Name="ItemsListView"
+                    ItemsSource="{Binding Items}"
+                    SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <StackLayout Padding="10" x:DataType="ble:IDevice">
+                            <Label Text="{Binding Name}" 
+                                LineBreakMode="NoWrap" 
+                                Style="{DynamicResource ListItemTextStyle}" 
+                                FontSize="16" />
+                            <Label Text="{Binding Rssi}" 
+                                LineBreakMode="NoWrap" 
+                                Style="{DynamicResource ListItemTextStyle}" 
+                                FontSize="14" />
+                            <Label Text="{Binding Id}" 
+                                LineBreakMode="NoWrap" 
+                                Style="{DynamicResource ListItemTextStyle}" 
+                                FontSize="12" />
+                            <BoxView HeightRequest="1" BackgroundColor="DarkGray" HorizontalOptions="FillAndExpand" />
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    NumberOfTapsRequired="1"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type local:DeviceViewModel}}, Path=ItemTapped}"		
+                                    CommandParameter="{Binding .}">
+                                </TapGestureRecognizer>
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </StackLayout>
+</ContentPage>
