@@ -11,18 +11,18 @@
 // https://www.uuidgenerator.net/
 
 #define DEVICE_ID      "ESPBatMon2" // ESPBatMon2=R010; ESPBatMon1=R002
-#define Shunt_resistor 0.010 // R002=0.002; R010=0.010
-#define max_Amp        10.0  // 10A
+#define Shunt_resistor 0.010 // R002=0.002; R010=0.010; look at your ina226 shunt resistor
+#define max_Amp        10.0  // 10A; your chair's estimated max current; affects the resolution
 #define SERVICE_UUID   "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define Update_UUID    "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define Announce_UUID  "aa337802-6aca-42a5-b34d-a8d9fc12a266"
-#define inActive_Sec   60 //60 x 5 = 5 minute no current
-#define noUse_Sec      12 //12 x 5 = 1 minute App not foreground
-#define noUseSleepTime 30000000    //30 * 1000000  /* Conversion factor for micro seconds to seconds */
-#define IdlemA         50 //idle current 50mA
-#define AlertmW        1425 //trigger alert watts 50mA * 28.5V * 1000
+#define inActive_Sec   60 //60 x 5 = 5 minute no current; shut down ESP32 to save power
+#define noUse_Sec      12 //12 x 5 = 1 minute App not foreground; obsolete
+#define noUseSleepTime 30000000    //30 * 1000000  /* Conversion factor for micro seconds to seconds */; obsolete
+#define IdlemA         50 //idle current 50mA; shut down ESP32 to save power
+#define AlertmW        1425 //trigger alert watts 50mA * 28.5V * 1000; wake up ESP32 current
 
-#define maxmWH00 34560000 // 12AH * 28V * 1000 (mwH) * 100 2 decimal
+#define maxmWH00 34560000 // 12AH * 28V * 1000 (mwH) * 100 2 decimal; obsolete
 
 //1 volt is equal to 1,000,000 microvolt (uV), or 1,000 millivolt (mV).
 //1 Ampere is equal to 1,000,000 microampere (uA), or 1,000 milliampere (mA).
