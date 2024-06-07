@@ -16,6 +16,7 @@ using System.Reflection;
 using System.Net;
 using System.Timers;
 using System.Threading;
+using Xamarin.Forms;
 
 namespace Batman2.Services
 {
@@ -238,14 +239,23 @@ namespace Batman2.Services
             ConnectParameters cp = new ConnectParameters();
             isConnecting = true;
             token = new CancellationTokenSource();
-            await adapter.ConnectToDeviceAsync(item, cp, token.Token);
+            if (Device.RuntimePlatform == Device.iOS) {
+                await adapter.ConnectToDeviceAsync(item, cp, token.Token);
+            } else {
+                await Device.InvokeOnMainThreadAsync(async () => {
+                    await adapter.ConnectToDeviceAsync(item, cp, token.Token);
+                });
+            }
             isConnecting = false;
             connectedDevice = item;
             canUpdate = true;
             try
             {
                 Services = await item.GetServicesAsync();
-                Service = Services[0];
+                Service = Services.FirstOrDefault(s => s.Id == SERVICE_UUID);
+                if (Service == null) {
+                    throw new Exception("Service UUID not found!");
+                }
                 Characteristics = await Service.GetCharacteristicsAsync();
                 Characteristic_update = Characteristics[0];
                 Characteristic = Characteristics[1];

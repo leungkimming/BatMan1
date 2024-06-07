@@ -248,14 +248,17 @@ namespace Batman2.ViewModels
                         Color = Color,
                     });
                 }
-
+                int labelsize = 18;
+                if (Device.RuntimePlatform == Device.Android) {
+                    labelsize = 30;
+                }
                 Chart = new BarChart()
                 {
                     Entries = chartEntries,
                     //LineMode = LineMode.Spline,
                     //LineAreaAlpha = 8,
                     //EnableYFadeOutGradient = false,
-                    LabelTextSize = 18,
+                    LabelTextSize = labelsize,
                     Margin = 10,
                     BarAreaAlpha = 1,
                     //ShowYAxisText = true,

@@ -30,7 +30,9 @@ namespace Batman2.Views
         {
             base.OnAppearing();
             _viewModel.OnAppearing();
-            CrossDeviceOrientation.Current.UnlockOrientation();
+            if (Device.RuntimePlatform == Device.iOS) {
+                CrossDeviceOrientation.Current.UnlockOrientation();
+            }
         }
     }
 }

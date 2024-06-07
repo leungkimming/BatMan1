@@ -161,9 +161,11 @@ namespace Batman2.ViewModels
         public void OnAppearing()
         {
             Title = $"{Battery.ConnectedDevice.Name} - Panel";
-            WH_max = Preferences.Get(Battery.ConnectedDevice?.Name + "_wh", 337);
-            WH_Alert = Preferences.Get(Battery.ConnectedDevice?.Name + "_alert", WH_max * 0.2f);
-            CrossDeviceOrientation.Current.LockOrientation(DeviceOrientations.Portrait);
+            WH_max = Preferences.Get(Battery.ConnectedDevice?.Name + "_wh", 400);
+            WH_Alert = Preferences.Get(Battery.ConnectedDevice?.Name + "_alert", 100);
+            if (Device.RuntimePlatform == Device.iOS) {
+                CrossDeviceOrientation.Current.LockOrientation(DeviceOrientations.Portrait);
+            }
             DT = DateTime.Now;
             if (_lastBattery != Battery.ConnectedDevice.Name)
             {

@@ -84,9 +84,9 @@
     <FlyoutItem Title="Scan and Connect Battery" Icon="icon_about.png">
         <ShellContent Route="DevicePage" ContentTemplate="{DataTemplate local:DevicePage}" />
     </FlyoutItem>
-    <FlyoutItem Title="About BatMan" Icon="icon_feed.png">
+    <!--<FlyoutItem Title="About BatMan" Icon="icon_feed.png">
         <ShellContent Route="AboutPage" ContentTemplate="{DataTemplate local:AboutPage}" />
-    </FlyoutItem>
+    </FlyoutItem>-->
 
     <!-- When the Flyout is visible this will be a menu item you can tie a click behavior to  -->
     <!--<MenuItem Text="Misc" StyleClass="MenuItemLayoutStyle" Clicked="OnMenuItemClicked">

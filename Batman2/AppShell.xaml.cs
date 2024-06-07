@@ -11,7 +11,7 @@ namespace Batman2
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute(nameof(DevicePage), typeof(DevicePage));
+//            Routing.RegisterRoute(nameof(DevicePage), typeof(DevicePage));
             Routing.RegisterRoute(nameof(UpdatePage), typeof(UpdatePage));
             Routing.RegisterRoute(nameof(HistoryPage), typeof(HistoryPage));
             Routing.RegisterRoute(nameof(GaugePage), typeof(GaugePage));

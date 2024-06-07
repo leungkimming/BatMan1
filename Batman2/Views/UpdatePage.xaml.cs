@@ -15,7 +15,9 @@ namespace Batman2.Views
         {
             InitializeComponent();
             BindingContext = _viewModel = new UpdateViewModel();
-            CrossDeviceOrientation.Current.UnlockOrientation();
+            if (Device.RuntimePlatform == Device.iOS) {
+                CrossDeviceOrientation.Current.UnlockOrientation();
+            }
         }
 
         protected override void OnAppearing()

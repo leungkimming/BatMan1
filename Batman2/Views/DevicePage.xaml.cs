@@ -24,7 +24,9 @@ namespace Batman2.Views
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            CrossDeviceOrientation.Current.UnlockOrientation();
+            if (Device.RuntimePlatform == Device.iOS) {
+                CrossDeviceOrientation.Current.UnlockOrientation();
+            }
             _viewModel.OnAppearing();
         }
     }

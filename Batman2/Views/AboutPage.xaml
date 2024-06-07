@@ -6,7 +6,7 @@
     <ContentPage.Content>
         <ScrollView>
             <StackLayout HorizontalOptions="Center">
-                <Image Source="Logo.png"></Image>
+                <Image HeightRequest="70" Source="Logo.png"></Image>
                 <Label TextType="Html" x:Name="content"></Label>
             </StackLayout>
         </ScrollView>

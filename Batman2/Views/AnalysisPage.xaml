@@ -41,7 +41,7 @@
             <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
                    Text="{Binding SD, StringFormat='{0:F2}'}" HorizontalOptions="Start" VerticalOptions="Center" />
             <Label Grid.Row="3" Grid.Column="0" Text="Confidence Level:" HorizontalOptions="Start" VerticalOptions="Center" />
-            <Entry Keyboard="Numeric" Grid.Row="3" Grid.Column="1" HorizontalOptions="End" 
+            <Entry Keyboard="Numeric" Grid.Row="3" Grid.Column="1" HorizontalOptions="End" Margin="{OnPlatform iOS='0,0,0,0', Android='0,-10,0,0'}"
                    Placeholder="1-99" Text="{Binding P_s, Mode=TwoWay}" />
             <Label Grid.Row="3" Grid.Column="2" Text="%" Grid.ColumnSpan="2"
                    HorizontalOptions="Start" VerticalOptions="Center" />
