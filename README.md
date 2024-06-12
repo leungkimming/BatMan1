@@ -80,25 +80,7 @@ SDK Versions:
 	5.0.408
 	5.0.407
 	5.0.406
-	5.0.405
-	5.0.404
-	5.0.403
-	5.0.402
-	5.0.401
-	5.0.400
-	5.0.302
-	5.0.100-rc.2.20479.15
-	3.1.426
-	3.1.423
-	3.1.420
-	3.1.418
-	3.1.417
-	3.1.416
-	3.1.415
-	3.1.414
-	3.1.413
-	3.1.412
-	3.1.411
+
 MSBuild SDKs: /Applications/Visual Studio.app/Contents/MonoBundle/MSBuild/Current/bin/Sdks
 
 .NET Runtime (x64)
@@ -110,25 +92,6 @@ Runtime Versions:
 	5.0.17
 	5.0.16
 	5.0.15
-	5.0.14
-	5.0.13
-	5.0.12
-	5.0.11
-	5.0.10
-	5.0.9
-	5.0.8
-	5.0.0-rc.2.20475.5
-	3.1.32
-	3.1.29
-	3.1.26
-	3.1.24
-	3.1.23
-	3.1.22
-	3.1.21
-	3.1.20
-	3.1.19
-	3.1.18
-	3.1.17
 
 Xamarin.Profiler
 Version: 1.8.0.49
@@ -193,5 +156,72 @@ Darwin 23.5.0 Darwin Kernel Version 23.5.0
     Wed May  1 20:09:52 PDT 2024
     root:xnu-10063.121.3~5/RELEASE_X86_64 x86_64
 ```
-# Visual Studio Windows
+# Visual Studio Windows Setup
+```
+Microsoft Visual Studio Community 2022
+Version 17.10.1
+VisualStudio.17.Release/17.10.1+34928.147
+Microsoft .NET Framework
+Version 4.8.09032
 
+Installed Version: Community
+
+ASP.NET and Web Tools   17.10.338.1105
+ASP.NET and Web Tools
+
+C# Tools   4.10.0-3.24270.2+e8f775c1d8a73dee7ad02408712d714251e708ea
+C# components used in the IDE. Depending on your project type and settings, a different version of the compiler may be used.
+
+Extensibility Message Bus   1.4.39 (main@e8108eb)
+Provides common messaging-based MEF services for loosely coupled Visual Studio extension components communication and integration.
+
+Microsoft JVM Debugger   1.0
+Provides support for connecting the Visual Studio debugger to JDWP compatible Java Virtual Machines
+
+Mono Debugging for Visual Studio   17.10.8 (a565b86)
+Support for debugging Mono processes with Visual Studio.
+
+NuGet Package Manager   6.10.0
+NuGet Package Manager in Visual Studio. For more information about NuGet, visit https://docs.nuget.org/
+
+Razor (ASP.NET Core)   17.10.3.2427201+4f57d1de251e654812adde201c0265a8ca7ca31d
+Provides languages services for ASP.NET Core Razor.
+
+SQL Server Data Tools   17.10.171.4
+Microsoft SQL Server Data Tools
+
+ToolWindowHostedEditor   1.0
+Hosting json editor into a tool window
+
+Visual Studio IntelliCode   2.2
+AI-assisted development for Visual Studio.
+
+VisualStudio.DeviceLog   1.0
+Information about my package
+
+VisualStudio.Mac   1.0
+Mac Extension for Visual Studio
+
+VSPackage Extension   1.0
+VSPackage Visual Studio Extension Detailed Info
+
+Xamarin   17.10.0.110 (main@cf2e960)
+Visual Studio extension to enable development for Xamarin.iOS and Xamarin.Android.
+
+Xamarin Designer   17.10.3.10 (remotes/origin/d17-10@3beef58f89)
+Visual Studio extension to enable Xamarin Designer tools in Visual Studio.
+
+Xamarin Templates   17.9.0 (38e87ba)
+Templates for building iOS, Android, and Windows apps with Xamarin and Xamarin.Forms.
+
+Xamarin.Android SDK   13.2.2.0 (d17-5/45b0e14)
+Xamarin.Android Reference Assemblies and MSBuild support.
+    Mono: d9a6e87
+    Java.Interop: xamarin/java.interop/d17-5@149d70fe
+    SQLite: xamarin/sqlite/3.40.1@68c69d8
+    Xamarin.Android Tools: xamarin/xamarin-android-tools/d17-5@ca1552d
+
+
+Xamarin.iOS and Xamarin.Mac SDK   16.4.0.23 (9defd91b3)
+Xamarin.iOS and Xamarin.Mac Reference Assemblies and MSBuild support.
+```
