@@ -54,3 +54,144 @@ Share the consumption history data as a csv file with other Apps
 ## Software
 * ESPBatMan3.ino is the arduino Program running inside the ESP32
 * Double check the shunt resistor value in your INA226 and update the value to the program 
+# Mac setup
+```
+Visual Studio Community 2022 for Mac
+Version 17.6.12 (build 410)
+Installation UUID: 84b78f24-02ec-45d3-ba44-3e429eab5e82
+
+Runtime
+.NET 7.0.3 (64-bit)
+Architecture: X64
+Microsoft.macOS.Sdk 13.1.1007; git-rev-head:8afca776a0a96613dfb7200e0917bb57f9ed5583; git-branch:release/7.0.1xx-xcode14.2
+
+Roslyn (Language Service)
+4.6.0-3.23180.6+99e956e42697a6dd886d1e12478ea2b27cceacfa
+
+NuGet
+Version: 6.4.0.117
+
+.NET SDK (x64)
+SDK: /usr/local/share/dotnet/sdk/6.0.422/Sdks
+SDK Versions:
+	6.0.422
+	6.0.403
+	6.0.401
+	5.0.408
+	5.0.407
+	5.0.406
+	5.0.405
+	5.0.404
+	5.0.403
+	5.0.402
+	5.0.401
+	5.0.400
+	5.0.302
+	5.0.100-rc.2.20479.15
+	3.1.426
+	3.1.423
+	3.1.420
+	3.1.418
+	3.1.417
+	3.1.416
+	3.1.415
+	3.1.414
+	3.1.413
+	3.1.412
+	3.1.411
+MSBuild SDKs: /Applications/Visual Studio.app/Contents/MonoBundle/MSBuild/Current/bin/Sdks
+
+.NET Runtime (x64)
+Runtime: /usr/local/share/dotnet/dotnet
+Runtime Versions:
+	6.0.30
+	6.0.11
+	6.0.9
+	5.0.17
+	5.0.16
+	5.0.15
+	5.0.14
+	5.0.13
+	5.0.12
+	5.0.11
+	5.0.10
+	5.0.9
+	5.0.8
+	5.0.0-rc.2.20475.5
+	3.1.32
+	3.1.29
+	3.1.26
+	3.1.24
+	3.1.23
+	3.1.22
+	3.1.21
+	3.1.20
+	3.1.19
+	3.1.18
+	3.1.17
+
+Xamarin.Profiler
+Version: 1.8.0.49
+Location: /Applications/Xamarin Profiler.app/Contents/MacOS/Xamarin Profiler
+
+Updater
+Version: 11
+
+Apple Developer Tools
+Xcode: 15.4 22622
+Build: 15F31d
+
+Xamarin Designer
+Version: 17.6.3.9
+Hash: 2648399ae8
+Branch: remotes/origin/d17-6
+Build date: 2024-05-08 22:24:17 UTC
+
+Xamarin.Mac
+Not Installed
+
+Xamarin.Android
+Not Installed
+
+Microsoft Build of OpenJDK
+Java SDK: /Library/Java/JavaVirtualMachines/microsoft-11.jdk
+11.0.12
+Android Designer EPL code available here:
+https://github.com/xamarin/AndroidDesigner.EPL
+
+Eclipse Temurin JDK
+Java SDK: Not Found
+
+Android SDK Manager
+Version: 17.6.0.50
+Hash: a715dca
+Branch: HEAD
+Build date: 2024-05-08 22:24:22 UTC
+
+Android Device Manager
+Version: 0.0.0.1309
+Hash: 06e3e77
+Branch: HEAD
+Build date: 2024-05-08 22:24:22 UTC
+
+Xamarin.iOS
+Version: 16.4.0.23 Visual Studio Community
+Hash: 9defd91b3
+Branch: xcode14.3
+Build date: 2023-10-23 16:15:00-0400
+
+Build Information
+Release ID: 1706120410
+Git revision: 2f8e0518dd80a933901821bac53f7398d4b61c0f
+Build date: 2024-05-08 22:22:37+00
+Build branch: release-17.6
+Build lane: release-17.6
+
+Operating System
+Mac OS X 14.5.0
+Darwin 23.5.0 Darwin Kernel Version 23.5.0
+    Wed May  1 20:09:52 PDT 2024
+    root:xnu-10063.121.3~5/RELEASE_X86_64 x86_64
+```
+# Visual Studio Windows
+
