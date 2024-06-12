@@ -38,7 +38,7 @@ Share the consumption history data as a csv file with other Apps
 * CPU 
 [ESP32-C3-DevKit](https://www.amazon.com/ESP32-C3-DevKitM-1-Development-ESP32-C3-MINI-1-Module-ESP32-C3FN4/dp/B09F5XRK12)
 * Power Monitor
-[INA226 0-36V 20A Power Monitor Module](https://www.amazon.com/-/zh_TW/1/dp/B08MKSQSL9/ref=sr_1_5?crid=2Y8E1WAQRXWQ2&dib=eyJ2IjoiMSJ9.d0LlPHX67LZ7GOswO4aaNd-XWBmz_wJCpfx5QxZD7NtE1Jb73oBMl37KnGlycMP_UGUTOgaDo04ssmXRsm05yuDjNES5gqGyPUHDagGKXjIvubQ5S0hzC-wF791mj8avR0c8i1wZCF8hpOx0_yrCwl3DuAnuDRG_y8LrUcqfu96OObwy7gypzQJ6zQgt7G-lgprv--8bJIYaZfyO69r1i6MNRHJte7lp3GGH-zWhc2o.2ce_MX7VkVsEFW4yfC_BL-Bz6hMtUyl2bOe7p76BHms&dib_tag=se&keywords=INA226&qid=1717505192&sprefix=ina22%2Caps%2C276&sr=8-5)
+[INA226 0-36V 20A Power Monitor Module](https://www.amazon.com/-/zh_TW/dp/B0CZJ5J25T/ref=sr_1_3?crid=L35Z98HCGH7G&dib=eyJ2IjoiMSJ9.KR7_AaStNOARQq-NIYUkOwesi7nwUJSJMzfJzC5if5X_RA8xdYMO13KIF20FkvEOHjVhhhvwZ75xFfUxWEplPmBA4A_EaZYBg5bq7w2FKFvz2yBk4cvgo_oDhOPaA-Htz9TBk5LCBVHoaGBEAH0vz8ip4MGl9xaPAfdFKoIWTSM6Oep8H6sHpVy13MsgKkqICrfMS4VxY4KZrDeTRLM7JqKdrFEv3A4jxTLHeQ7XbO1acS2EBPUTimyshSv1r-5akTocEsa75rXFc7AsYo3vsp1X-dtt2wQA_-3rZf9GBvg.870aYSgHJrkuPO5XiU-eMYqbeqnM-bLTsxn2biKcY68&dib_tag=se&keywords=ina226%2Bvoltage%2Bcurrent%2Bmodule&qid=1718009494&sprefix=INA226%2Caps%2C274&sr=8-3&th=1)
 * 7-36v DC to 5v DC switching power supply
 [OKI-78SR-5/1.5-W36-C](https://www.digikey.tw/zh/products/detail/murata-power-solutions-inc/OKI-78SR-5-1-5-W36-C/2259781)
 ## Design
