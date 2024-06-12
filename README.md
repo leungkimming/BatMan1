@@ -36,9 +36,9 @@ Share the consumption history data as a csv file with other Apps
 * The BatMan App will connect to the circuit via Bluetooth and receive these data every 5 seconds
 ## Components
 * CPU 
-[ESP32-C3-DevKit](https://www.amazon.com/ESP32-C3-DevKitM-1-Development-ESP32-C3-MINI-1-Module-ESP32-C3FN4/dp/B09F5XRK12)
+[ESP32-C3-DevKit](https://www.amazon.com/-/zh_TW/16385/dp/B08RDDFWFJ)
 * Power Monitor
-[INA226 0-36V 20A Power Monitor Module](https://www.amazon.com/-/zh_TW/dp/B0CZJ5J25T/ref=sr_1_3?crid=L35Z98HCGH7G&dib=eyJ2IjoiMSJ9.KR7_AaStNOARQq-NIYUkOwesi7nwUJSJMzfJzC5if5X_RA8xdYMO13KIF20FkvEOHjVhhhvwZ75xFfUxWEplPmBA4A_EaZYBg5bq7w2FKFvz2yBk4cvgo_oDhOPaA-Htz9TBk5LCBVHoaGBEAH0vz8ip4MGl9xaPAfdFKoIWTSM6Oep8H6sHpVy13MsgKkqICrfMS4VxY4KZrDeTRLM7JqKdrFEv3A4jxTLHeQ7XbO1acS2EBPUTimyshSv1r-5akTocEsa75rXFc7AsYo3vsp1X-dtt2wQA_-3rZf9GBvg.870aYSgHJrkuPO5XiU-eMYqbeqnM-bLTsxn2biKcY68&dib_tag=se&keywords=ina226%2Bvoltage%2Bcurrent%2Bmodule&qid=1718009494&sprefix=INA226%2Caps%2C274&sr=8-3&th=1)
+[INA226 0-36V 20A Power Monitor Module](https://www.amazon.com/-/zh_TW/dp/B0CZJ5J25T)
 * 7-36v DC to 5v DC switching power supply
 [OKI-78SR-5/1.5-W36-C](https://www.digikey.tw/zh/products/detail/murata-power-solutions-inc/OKI-78SR-5-1-5-W36-C/2259781)
 ## Design
