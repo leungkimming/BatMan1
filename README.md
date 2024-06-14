@@ -42,7 +42,7 @@ Share the consumption history data as a csv file with other Apps
 * 7-36v DC to 5v DC switching power supply
 [OKI-78SR-5/1.5-W36-C](https://www.digikey.tw/zh/products/detail/murata-power-solutions-inc/OKI-78SR-5-1-5-W36-C/2259781)
 ## Design
-* Low side sensing: INA266 is placed in between the wheelchair's negative connector and the battery's negative pole. Their positive poles are interconnected
+* High side sensing: INA226 is placed in between the battery's positive connector and the wheelchair's positive pole. Their ground poles are interconnected
 * OKI-78SR draw power from the 24-36v battery and supply 5v to ESP32 and INA226
 * ESP32 communicate with INA226 via I2C interface to obtain current V and A every 5 seconds and send the computed remaining capacity; current power consumption, current Amperes and voltage via Bluetooth to the BatMan App
 * The ESP32 will store the remaining capacity in its internal memory before going hibernation due to low current. This is to save power
