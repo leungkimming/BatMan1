@@ -2,10 +2,13 @@
 
 public partial class App : Application
 {
-	public App()
+    private static IServiceProvider ServicesProvider;
+    public static IServiceProvider Services => ServicesProvider;
+    public App(IServiceProvider provider)
 	{
+		ServicesProvider = provider;
 		InitializeComponent();
-
-		MainPage = new AppShell();
+        //batmanBattery = Services.GetService<IBatManBattery>();
+        MainPage = new AppShell();
 	}
 }

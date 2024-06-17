@@ -28,5 +28,14 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+		<string>bluetooth-peripheral</string>
+	</array>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>YOUR CUSTOM MESSAGE</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>YOUR CUSTOM MESSAGE</string>
 </dict>
 </plist>

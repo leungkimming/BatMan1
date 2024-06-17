@@ -72,9 +72,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="AndroidManifest.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="Plugin.BLE" Version="3.1.0" />
+		<PackageReference Include="Sylvan.Data.Csv" Version="1.1.7" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -83,4 +91,13 @@
 	  </None>
 	</ItemGroup>
 
+	<!-- <ItemGroup>
+	  <MauiXaml Update="View\DevicePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup> -->
+	
+	<PropertyGroup>
+		<MtouchInterpreter>-all</MtouchInterpreter>
+	</PropertyGroup>
 </Project>

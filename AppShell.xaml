@@ -3,13 +3,12 @@
     x:Class="BatMan2.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:BatMan2"
+    xmlns:views="clr-namespace:BatMan2.Views"
     Shell.FlyoutBehavior="Disabled"
-    Title="BatMan2">
-
+    Title="BatMan2" Shell.BackgroundColor="SkyBlue">
     <ShellContent
         Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        ContentTemplate="{DataTemplate views:DevicePage}"
+        Route="DevicePage" />
 
 </Shell>

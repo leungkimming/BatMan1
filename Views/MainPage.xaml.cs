@@ -1,4 +1,4 @@
-﻿namespace BatMan2;
+﻿namespace BatMan2.Views;
 
 public partial class MainPage : ContentPage
 {
