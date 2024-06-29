@@ -8,9 +8,8 @@ The daily consumption history data forms a normal distribution to predict if a r
 ![BatMan App - Analytic](/ESPBatMan3/HW/Analyze.png)
 Share the consumption history data as a csv file with other Apps
 ![BatMan App - Data Sharing](/ESPBatMan3/HW/Share.png)
-* The Batman2.sln is the App's Visual Studio solution written in C# Xamarin
-* As Xamarin's support has endded on May 1, 2024, my next plan is to rewrite the solution in MAUI
-* Please refer to this [old Xamarin Branch](https://github.com/leungkimming/BatMan1/tree/Xamarin)
+* The Batman2.sln is the App's Visual Studio solution written in C# MAUI
+* Xamarin's support has endded on May 1, 2024. Please refer to this [old Xamarin Branch](https://github.com/leungkimming/BatMan1/tree/Xamarin)
 
 # Coulomb counting basics
 ## Watt-Hour calculation
@@ -55,7 +54,10 @@ Share the consumption history data as a csv file with other Apps
 ## Software
 * ESPBatMan3.ino is the arduino Program running inside the ESP32
 * Double check the shunt resistor value in your INA226 and update the value to the program 
-# Mac setup
+# Mac setup (MAUI)
+* Install latest Xcode.
+* In Visual Studio (Windows), "paired to Mac" to build, run in simulators and local devices.
+# Mac setup (Xamarin)
 ```
 Visual Studio Community 2022 for Mac
 Version 17.6.12 (build 410)
