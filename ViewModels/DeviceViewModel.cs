@@ -1,10 +1,5 @@
 ﻿using Plugin.BLE.Abstractions.Contracts;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace BatMan2.ViewModels
@@ -15,7 +10,7 @@ namespace BatMan2.ViewModels
         private string _error;
         private bool _canDemo;
         private bool _isConnecting = false;
-
+        private GaugeViewModel gaugeViewModel;
         public ObservableCollection<IDevice> Items { get; set; }
         public ICommand LoadItemsCommand => new Command(async () => await ExecuteLoadItemsCommand());
         public Command<IDevice> ItemTapped { get; }
@@ -42,16 +37,15 @@ namespace BatMan2.ViewModels
             set { SetProperty(ref _isConnecting, value); }
         }
 
-        public DeviceViewModel(IBatManBattery battery, IReadingStore<Reading> readingstore) {
-            Battery = battery;
+        public DeviceViewModel(IReadingStore<Reading> readingstore,
+            GaugeViewModel gaugeVM) {
+            gaugeViewModel = gaugeVM;
             ReadingStore = readingstore;
 
             Items = new ObservableCollection<IDevice>();
             Title = "Scan & Connect Battery";
             canDemo = true;
-            //LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
             ItemTapped = new Command<IDevice>(OnItemSelected);
-            //DemoCommand = new Command(OnDemo);
             DemoCommand = new Command(
                 execute: () =>
                 {
@@ -68,18 +62,6 @@ namespace BatMan2.ViewModels
             HistoryCommand = new Command(OnViewHistory);
             AnalyzeCommand = new Command(OnAnalyze);
             AboutCommand = new Command(OnAbout);
-
-
-            var dev1 = new MockDevice();
-            dev1.Custname = "DemoBatt1";
-            var dev2 = new MockDevice();
-            dev2.Custname = "DemoBatt2";
-            var dev3 = new MockDevice();
-            dev3.Custname = "DemoBatt3";
-            Items.Add(dev1);
-            Items.Add(dev2);
-            Items.Add(dev3);
-            OnPropertyChanged();
         }
 
         void RefreshCanExecutes()
@@ -150,37 +132,36 @@ namespace BatMan2.ViewModels
             //IsBusy = false;
             isConnecting = false;
             // This will push the BatteryPage onto the navigation stack
-//            await Shell.Current.GoToAsync($"{nameof(GaugePage)}?{nameof(GaugeViewModel)}");
+            await Shell.Current.GoToAsync($"{nameof(GaugePage)}?{nameof(GaugeViewModel)}");
         }
 
         private void OnDemo(object obj)
         {
-            //Items.Clear();
-            //IBattery mockBattery = new MockBattery();
-            //DependencyService.RegisterSingleton<IBattery>(mockBattery);
-            //Error = "Demo mode activated!";
-            //canDemo = false;
-            //RefreshCanExecutes();
-            //DependencyService.Get<GaugeViewModel>().ActivateDemo();
-            //Battery.DeviceFound += (o, device) =>
-            //{
-            //    Items.Add(device);
-            //};
+            Items.Clear();
+            IBatManBattery mockBattery = new MockBattery(ReadingStore);
+            DependencyService.RegisterSingleton<IBatManBattery>(mockBattery);
+            Error = "Demo mode activated!";
+            canDemo = false;
+            RefreshCanExecutes();
+            gaugeViewModel.ActivateDemo();
+            Battery.DeviceFound += (o, device) => {
+                Items.Add(device);
+            };
         }
 
         private async void OnViewHistory(object obj)
         {
-//            await Shell.Current.GoToAsync(nameof(HistoryPage));
+            await Shell.Current.GoToAsync(nameof(HistoryPage));
         }
 
         private async void OnAbout(object obj)
         {
-//            await Shell.Current.GoToAsync(nameof(AboutPage));
+            await Shell.Current.GoToAsync(nameof(AboutPage));
         }
 
         private async void OnAnalyze(object obj)
         {
-//            await Shell.Current.GoToAsync($"{ nameof(AnalysisPage)}?BatteryName=");
+            await Shell.Current.GoToAsync($"{ nameof(AnalysisPage)}?BatteryName=");
         }
     }
 }

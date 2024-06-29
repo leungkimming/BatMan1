@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage     
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="BatMan2.Views.HistoryPage"
+    Title="{Binding Title}"
+    xmlns:local="clr-namespace:BatMan2.ViewModels"  
+    xmlns:model="clr-namespace:BatMan2.Models"
+    x:Name="HisytoryPage">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Analyze" Command="{Binding AnalyzeCommand}" Order="Secondary" Priority="1" />
+        <ToolbarItem Text="Share" Command="{Binding ShareCommand}"  Order="Secondary" Priority="1" />
+        <ToolbarItem Text="Delete" Command="{Binding DeleteCommand}"  Order="Secondary" Priority="1" />
+        <ToolbarItem Text="Import" Command="{Binding ImportCommand}"  Order="Secondary" Priority="1" />
+    </ContentPage.ToolbarItems>
+    <!--
+      x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
+      https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
+    -->
+    <RefreshView x:DataType="local:HistoryViewModel" Command="{Binding LoadItemsCommand}"
+                 IsRefreshing="{Binding IsBusy, Mode=TwoWay}"  IsEnabled="true" Margin="0,0,0,0">
+        <CollectionView x:Name="ItemsListView"
+                IsGrouped="true"
+                SelectionMode="Single" SelectedItem="{Binding SelectedGroup}">
+            <CollectionView.Header >
+                <Grid Padding="2" BackgroundColor="DarkGray">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="76" />
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="65" />
+                        <ColumnDefinition Width="45" />
+                        <ColumnDefinition Width="45" />
+                    </Grid.ColumnDefinitions>
+                    <Label Text="Date   Time"
+                        Grid.Column="1" 
+                        LineBreakMode="NoWrap" 
+                        TextColor="White"                        
+                        FontSize="13" />
+                    <Label Text="W.Hour" 
+                        Grid.Column="2"
+                        LineBreakMode="NoWrap"
+                        TextColor="White"
+                        FontSize="13" />
+                    <Label Text="Watts(W)" 
+                        Grid.Column="3"
+                        LineBreakMode="NoWrap"
+                        TextColor="White"
+                        FontSize="13" />
+                    <Label Text="Amp." 
+                        Grid.Column="4"
+                        LineBreakMode="NoWrap"
+                        TextColor="White"
+                        FontSize="13" />
+                    <Label Text="Volt." 
+                        Grid.Column="5"
+                        LineBreakMode="NoWrap"
+                        TextColor="White"
+                        FontSize="13" />
+                </Grid>
+            </CollectionView.Header>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="2" x:DataType="model:Reading" Margin="0,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20" />
+                            <ColumnDefinition Width="76" />
+                            <ColumnDefinition Width="70" />
+                            <ColumnDefinition Width="65" />
+                            <ColumnDefinition Width="45" />
+                            <ColumnDefinition Width="45" />
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding DT, StringFormat='{0:dd/MM HH:mm}'}"
+                            Grid.Column="1"
+                            LineBreakMode="NoWrap" 
+                            FontSize="13" />
+                        <Label Text="{Binding WH, StringFormat='{0:F5}'}" 
+                            Grid.Column="2"
+                            LineBreakMode="NoWrap"
+                            FontSize="13" />
+                        <Label Text="{Binding W, StringFormat='{0:F5}'}" 
+                            Grid.Column="3"
+                            LineBreakMode="NoWrap"
+                            FontSize="13" />
+                        <Label Text="{Binding A, StringFormat='{0:F3}'}" 
+                            Grid.Column="4"
+                            LineBreakMode="NoWrap"
+                            FontSize="13" />
+                        <Label Text="{Binding V, StringFormat='{0:F3}'}" 
+                            Grid.Column="5"
+                            LineBreakMode="NoWrap"
+                            FontSize="13" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.GroupHeaderTemplate > 
+                <DataTemplate x:DataType="model:ReadingGroup">
+                    <StackLayout>
+                        <Label Text="{Binding BatteryG}" Margin="0,10,0,0"
+                               FontSize="{OnPlatform iOS=Header, Android=20}" FontAttributes="Bold" />
+                        <BoxView BackgroundColor="#121212" HeightRequest="2" />
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+
+        </CollectionView>
+    </RefreshView>
+</ContentPage>

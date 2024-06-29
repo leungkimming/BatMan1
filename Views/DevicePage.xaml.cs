@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Plugin.BLE.Abstractions.Contracts;
-//using Plugin.DeviceOrientation;
-//using Plugin.DeviceOrientation.Abstractions;
-
-namespace BatMan2.Views;
+﻿namespace BatMan2.Views;
 
 public partial class DevicePage : ContentPage
 {

@@ -27,8 +27,11 @@ namespace BatMan2.Services
     public class MockDevice : IDevice
     {
         public string Custname { get; set; }
+        public string Name => Custname;
+        public Guid Id => new Guid();
+        public int Rssi => 0;
 
-        Guid IDevice.Id => new Guid();
+        Guid IDevice.Id => Id;
 
         string IDevice.Name => Custname; //"ESPBatMon2";
 
@@ -100,10 +103,11 @@ namespace BatMan2.Services
         private double voltage = 28.3;
         private double wh = 123.4;
         private double amp = 2;
-        public IReadingStore<Reading> ReadingStore = DependencyService.Get<IReadingStore<Reading>>();
+        public IReadingStore<Reading> ReadingStore;
 
-        public MockBattery()
+        public MockBattery(IReadingStore<Reading> reading)
         {
+            ReadingStore = reading;
             canScan = true;
             canUpdate = false;
             isConnected = false;

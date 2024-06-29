@@ -66,8 +66,8 @@ namespace BatMan2.Services
             deviceList = new ObservableCollection<IDevice>();
             adapter.DeviceDiscovered += (s, a) =>
             {
-                //if ((a.Device.Name != null) && a.Device.Name.StartsWith("ESPBatMon"))
-                if (a.Device.Name != null)
+                if ((a.Device.Name != null) && a.Device.Name.StartsWith("ESPBatMon"))
+                //if (a.Device.Name != null)
                 {
                     deviceList.Add(a.Device);
                     OnDeviceFound(a.Device);

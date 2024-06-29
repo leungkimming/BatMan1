@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage     
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+    x:Class="BatMan2.Views.AnalysisPage"
+    Title="{Binding Title}"
+    xmlns:local="clr-namespace:BatMan2.ViewModels"  
+    xmlns:model="clr-namespace:BatMan2.Models" >
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Share" Command="{Binding ShareCommand}"/>
+    </ContentPage.ToolbarItems>
+    <!--
+      x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
+      https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
+    -->
+    <VerticalStackLayout x:DataType="local:AnalysisViewModel">
+        <Label Text="{Binding Error}" HorizontalOptions="Center" TextColor="Red"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="150" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="30"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Text="Distribution Model:" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3"
+                   Text="{Binding Model}" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="1" Grid.Column="0" Text="Mean:" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3"
+                   Text="{Binding Mean, StringFormat='{0:F2}'}" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="2" Grid.Column="0" Text="Standard Dev.:" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
+                   Text="{Binding SD, StringFormat='{0:F2}'}" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="3" Grid.Column="0" Text="Confidence Level:" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Entry Keyboard="Numeric" Grid.Row="3" Grid.Column="1" HorizontalOptions="End" Margin="{OnPlatform iOS='0,0,0,0', Android='0,-10,0,0'}"
+                   Placeholder="1-99" Text="{Binding P_s, Mode=TwoWay}" />
+            <Label Grid.Row="3" Grid.Column="2" Text="%" Grid.ColumnSpan="2"
+                   HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="4" Grid.Column="0" Text="Recharge Alert:" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="4" Grid.Column="1" Text="{Binding Min, StringFormat='{0:F0}'}" HorizontalOptions="End" VerticalOptions="Center" />
+            <Label Grid.Row="4" Grid.Column="2" Text="WH" HorizontalOptions="Start" VerticalOptions="Center" />
+            <Label Grid.Row="4" Grid.Column="3" Text="{Binding Remaining}"
+                   IsVisible="{Binding IsSingle, Mode=TwoWay}" HorizontalOptions="Start" VerticalOptions="Center" />
+            <microcharts:ChartView x:Name="chartView" Chart="{Binding Chart}" Grid.Row="5" Grid.ColumnSpan="4"/>
+        </Grid>
+        <RefreshView x:DataType="local:AnalysisViewModel" Command="{Binding LoadItemsCommand}"
+                     IsRefreshing="{Binding IsBusy, Mode=TwoWay}" Margin="0,1,0,0"
+                     IsEnabled="{Binding InputValid, Mode=TwoWay}">
+            <CollectionView x:Name="ItemsListView"
+                    ItemsSource="{Binding Items}" Footer=""
+                    SelectionMode="None">
+                <CollectionView.Header>
+                        <Grid Padding="2" BackgroundColor="DarkGray" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="Date" Grid.Column="0" LineBreakMode="NoWrap" 
+                                TextColor="White" />
+                            <Label Text="WH Charged" Grid.Column="1" LineBreakMode="NoWrap"
+                                TextColor="White" />
+                            <Label Text="WH Consumed" Grid.Column="2" LineBreakMode="NoWrap"
+                                TextColor="White" />
+                        </Grid>
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="2" x:DataType="model:Consumption">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="90" />
+                                <ColumnDefinition Width="100" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <Label Text="{Binding DT, StringFormat='{0:dd/MM/yyyy}'}"
+                                Grid.Column="0" LineBreakMode="NoWrap" />
+                            <Label Text="{Binding WH_in, StringFormat='{0:F3}'}" 
+                                Grid.Column="1" HorizontalOptions="End" />
+                            <Label Text="{Binding WH_out, StringFormat='{0:F3}'}" 
+                                Grid.Column="2" HorizontalOptions="End" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </VerticalStackLayout>
+</ContentPage>

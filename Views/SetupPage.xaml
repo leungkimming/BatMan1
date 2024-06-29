@@ -1,0 +1,30 @@
+﻿<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="BatMan2.Views.SetupPage"
+    xmlns:local="clr-namespace:BatMan2.ViewModels"  
+    Title="{Binding Title}">
+
+    <VerticalStackLayout  x:DataType="local:SetupViewModel">
+        <Label Text="{Binding Message}" HorizontalOptions="Center" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Text="Guage Max WH:"
+               HorizontalOptions="Start" VerticalOptions="Center" />
+            <Entry Keyboard="Numeric" Grid.Row="0" Grid.Column="1" Placeholder="0-999" Text="{Binding WH, Mode=TwoWay}" />
+            <Label Grid.Row="1" Grid.Column="0" Text="Guage Alert WH:"
+               HorizontalOptions="Start" VerticalOptions="Center" />
+            <Entry Keyboard="Numeric" Grid.Row="1" Grid.Column="1" Placeholder="0-999" Text="{Binding Alert, Mode=TwoWay}" />
+
+            <Button Grid.Row="2" Grid.ColumnSpan="2" Text="Update" Command="{Binding SetupGaugeCommand}" IsEnabled="{Binding InputValid}"/>
+        </Grid>
+    </VerticalStackLayout>
+</ContentPage>

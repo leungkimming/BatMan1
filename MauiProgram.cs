@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using static Microsoft.Maui.ApplicationModel.Permissions;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace BatMan2;
 
@@ -10,7 +10,8 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
-			.RegisterServices()
+            .UseSkiaSharp()
+            .RegisterServices()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -25,11 +26,21 @@ public static class MauiProgram
 	}
 
     private static MauiAppBuilder RegisterServices(this MauiAppBuilder builder) {
-		builder.Services
-			.AddSingleton<IReadingStore<Reading>, ReadingStore>()
-			.AddSingleton<IBatManBattery, BatManBattery>()
-			.AddSingleton<DeviceViewModel>()
-            .AddSingleton<DevicePage>();
+        builder.Services
+            .AddSingleton<IReadingStore<Reading>, ReadingStore>()
+            .AddSingleton<AnalysisViewModel>()
+            .AddSingleton<AnalysisPage>()
+            .AddSingleton<HistoryViewModel>()
+            .AddSingleton<HistoryPage>()
+            .AddSingleton<SetupViewModel>()
+            .AddSingleton<SetupPage>()
+            .AddSingleton<UpdateViewModel>()
+            .AddSingleton<UpdatePage>()
+            .AddSingleton<AboutPage>()
+            .AddSingleton<DeviceViewModel>()
+            .AddSingleton<DevicePage>()
+			.AddSingleton<GaugeViewModel>()
+			.AddSingleton<GaugePage>();
         return builder;
     }
 }

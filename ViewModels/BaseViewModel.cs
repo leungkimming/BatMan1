@@ -7,7 +7,7 @@ namespace BatMan2.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
-        public IBatManBattery Battery { get; set; }
+        public IBatManBattery Battery => DependencyService.Get<IBatManBattery>();
         public IReadingStore<Reading> ReadingStore { get; set; }
 
         bool isBusy = false;
