@@ -32,7 +32,13 @@
             <BoxView Grid.Row="1" Grid.ColumnSpan="2" Color="WhiteSmoke" />
             <BoxView Grid.Row="2" Grid.Column="0" Color="WhiteSmoke" />
             <BoxView Grid.Row="2" Grid.Column="1" Color="WhiteSmoke" />
-            <StackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="Center">
+            <StackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="Center" 
+                         BackgroundColor="WhiteSmoke">
+                <StackLayout.Resources>
+                    <Style TargetType="Label">
+                        <Setter Property="TextColor" Value="Black"/>
+                    </Style>
+                </StackLayout.Resources>
                 <Label Text="{Binding DT, StringFormat='{0:dd/MM/yyyy HH:mm:ss}'}"
                        HorizontalOptions="Center"/>
                 <Label Text="Consumption Today" HorizontalOptions="Center"/>

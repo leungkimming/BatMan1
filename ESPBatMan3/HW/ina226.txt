@@ -1,0 +1,6 @@
+https://github.com/jarzebski/Arduino-INA226/tree/master/INA226_alert
+
+http://www.jarzebski.pl/arduino/czujniki-i-sensory/cyfrowy-czujnik-pradu-mocy-ina226.html
+
+https://github.com/wollewald/INA226_WE
+
