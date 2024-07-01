@@ -138,27 +138,10 @@ that you will be used to Setup your battery's Panel using the Setup function.
 that this is of the certain confidence level that your battery is enough for a typical
 day's usage. A Recharge is required if your battery is falling near this alert level.
 
-# Mac setup (MAUI)
+# Mac setup
 * Visual Studio for Mac will no longer be supported after August 31, 2024.
-* Hence, only need to install:
-	* Latest Xcode.
-	* Latest .NET
 * To test in IOS, in Visual Studio (Windows), "paired to Mac" to build & run in simulators and local devices.
-
-# Mac setup (Xamarin)
 ```
-Visual Studio Community 2022 for Mac
-Version 17.6.12 (build 410)
-Installation UUID: 84b78f24-02ec-45d3-ba44-3e429eab5e82
-
-Runtime
-.NET 7.0.3 (64-bit)
-Architecture: X64
-Microsoft.macOS.Sdk 13.1.1007; git-rev-head:8afca776a0a96613dfb7200e0917bb57f9ed5583; git-branch:release/7.0.1xx-xcode14.2
-
-Roslyn (Language Service)
-4.6.0-3.23180.6+99e956e42697a6dd886d1e12478ea2b27cceacfa
-
 NuGet
 Version: 6.4.0.117
 
@@ -184,62 +167,9 @@ Runtime Versions:
 	5.0.16
 	5.0.15
 
-Xamarin.Profiler
-Version: 1.8.0.49
-Location: /Applications/Xamarin Profiler.app/Contents/MacOS/Xamarin Profiler
-
-Updater
-Version: 11
-
 Apple Developer Tools
 Xcode: 15.4 22622
 Build: 15F31d
-
-Xamarin Designer
-Version: 17.6.3.9
-Hash: 2648399ae8
-Branch: remotes/origin/d17-6
-Build date: 2024-05-08 22:24:17 UTC
-
-Xamarin.Mac
-Not Installed
-
-Xamarin.Android
-Not Installed
-
-Microsoft Build of OpenJDK
-Java SDK: /Library/Java/JavaVirtualMachines/microsoft-11.jdk
-11.0.12
-Android Designer EPL code available here:
-https://github.com/xamarin/AndroidDesigner.EPL
-
-Eclipse Temurin JDK
-Java SDK: Not Found
-
-Android SDK Manager
-Version: 17.6.0.50
-Hash: a715dca
-Branch: HEAD
-Build date: 2024-05-08 22:24:22 UTC
-
-Android Device Manager
-Version: 0.0.0.1309
-Hash: 06e3e77
-Branch: HEAD
-Build date: 2024-05-08 22:24:22 UTC
-
-Xamarin.iOS
-Version: 16.4.0.23 Visual Studio Community
-Hash: 9defd91b3
-Branch: xcode14.3
-Build date: 2023-10-23 16:15:00-0400
-
-Build Information
-Release ID: 1706120410
-Git revision: 2f8e0518dd80a933901821bac53f7398d4b61c0f
-Build date: 2024-05-08 22:22:37+00
-Build branch: release-17.6
-Build lane: release-17.6
 
 Operating System
 Mac OS X 14.5.0
