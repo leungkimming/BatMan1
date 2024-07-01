@@ -73,7 +73,7 @@ Share the consumption history data as a csv file with other Apps
 
 # The BatMan Mobile App
 * The Batman2.sln is the App's Visual Studio solution written in C# Cross Platforms MAUI App
-* Xamarin's support has endded on May 1, 2024. Please refer to this [old Xamarin Branch](https://github.com/leungkimming/BatMan1/tree/Xamarin)
+* Xamarin's support has endded on May 1, 2024. Please refer to this [old Xamarin Branch](https://github.com/leungkimming/BatMan1/tree/main)
 ## Scan and Connect Battery
 Pull down to start scanning for nearby BLE devices. If only one is found,
 it will be connected. Otherwise, users can select which one to connect.
