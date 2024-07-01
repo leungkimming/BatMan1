@@ -8,8 +8,7 @@ The daily consumption history data forms a normal distribution to predict if a r
 ![BatMan App - Analytic](/ESPBatMan3/HW/Analyze.png)
 Share the consumption history data as a csv file with other Apps
 ![BatMan App - Data Sharing](/ESPBatMan3/HW/Share.png)
-* The Batman2.sln is the App's Visual Studio solution written in C# MAUI
-* Xamarin's support has endded on May 1, 2024. Please refer to this [old Xamarin Branch](https://github.com/leungkimming/BatMan1/tree/Xamarin)
+* Xamarin's support has endded on May 1, 2024. Please refer to this [new MAUI Branch](https://github.com/leungkimming/BatMan1/tree/master)
 
 # Coulomb counting basics
 ## Watt-Hour calculation
