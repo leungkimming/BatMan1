@@ -53,10 +53,7 @@ Share the consumption history data as a csv file with other Apps
 ## Software
 * ESPBatMan3.ino is the arduino Program running inside the ESP32
 * Double check the shunt resistor value in your INA226 and update the value to the program 
-# Mac setup (MAUI)
-* Install latest Xcode.
-* In Visual Studio (Windows), "paired to Mac" to build, run in simulators and local devices.
-# Mac setup (Xamarin)
+# Mac setup
 ```
 Visual Studio Community 2022 for Mac
 Version 17.6.12 (build 410)
