@@ -43,8 +43,6 @@ Share the consumption history data as a csv file with other Apps
 * High side sensing: INA226 is placed in between the battery's positive connector and the wheelchair's positive pole. Their ground poles are interconnected
 * OKI-78SR draw power from the 24-36v battery and supply 5v to ESP32 and INA226
 * ESP32 communicate with INA226 via I2C interface to obtain current V and A every 5 seconds and send the computed remaining capacity; current power consumption, current Amperes and voltage via Bluetooth to the BatMan App
-* The ESP32 will store the remaining capacity in its internal memory before going hibernation due to low current. This is to save power
-* INA226 will wake up ESP32 upon high current detected
 ## The Circuit
 ![Circuit board](/ESPBatMan3/HW/circuit.png)
 ## The final assembly
@@ -52,6 +50,9 @@ Share the consumption history data as a csv file with other Apps
 ## Software
 * ESPBatMan3.ino is the arduino Program running inside the ESP32
 * Double check the shunt resistor value in your INA226 and update the value to the program 
+* The ESP32 will store the remaining capacity in its internal memory (preferences) before going hibernation due to low current when you switch off the wheelchair (defined as IdlemA). This is to save battery power
+* INA226 will wake up ESP32 upon wheelchair startup power consumption (defined as AlertmW) detected
+
 ## Communication Specification
 ### Name and UUIDs
 * The Device Name must start with 'BatMan', such as 'BatMan010'
@@ -79,18 +80,13 @@ Pull down to start scanning for nearby BLE devices. If only one is found,
 it will be connected. Otherwise, users can select which one to connect.
 
 ## Demo Mode
-Select the 'Demo' menu item to switch to Demo mode. The App will simulate 3 Devices
-for Demo purposes. Once a device is selected, users can shake the iPhone
-to switch between 'Charging' mode and 'Consuming' mode.
+Select the 'Demo' menu item to switch to Demo mode. The App will simulate 3 Devices for Demo purposes. Once a device is selected, users can shake the mobile device to switch between 'Charging' mode and 'Consuming' mode.
 
 ## History
-* Before you connect to any battery, all batteries' histories will be shown. Otherwise,
-only the histories of the connected battery will be shown.
+* Before you connect to any battery, all batteries' histories will be shown. Otherwise, only the histories of the connected battery will be shown.
 * Pull down to refresh lastest histories.
-* If you select a history row, the selected row's battery histories will be selected
-for Analyze, Share and Delete. Otherwise, all battery's histories will be selected.
-* To save storage space, only 7 days' per 5-minutes record will be kept. Beyond 7 days,
-history records will be compressed without affecting the daily consumption analysis.
+* If you select a history row, the selected row's battery histories will be selected for Analyze, Share and Delete. Otherwise, all battery's histories will be selected.
+* To save storage space, only 7 days' per 5-minutes record will be kept. Beyond 7 days, history records will be compressed without affecting the daily consumption analysis.
 * Select the 'Analyze' menu item to analyze the histories. 
 * Select the 'Share' menu item to share the histories thru your phone's App e.g. Email.
 * Select the 'Delete' menu item to delete the histories.
@@ -98,45 +94,30 @@ history records will be compressed without affecting the daily consumption analy
 as output from the 'Share' function
 
 ## Analyze
-* If you have connected to a battery or selected one of the history row, the selected/connected
-battery's histories will be analyzed. Otherwise, histories of all batteries will be analyzed.
-* The App will use the best fit model between 'Normal' and 'Gamma' distribution model to do analysis. 
-The consumption's mean and standard deviation will be calculated.
-* You can adjust the default 90% confidence level to calculate the Recharge Alert or Threshold.
-For example, you can have 99% for sure the remaining WH is enough for a typical day's usage 
-before recharge. You need this WH level to setup the Panel's alert level.
+* If you have connected to a battery or selected one of the history row, the selected/connected battery's histories will be analyzed. Otherwise, histories of all batteries will be analyzed.
+* The App will use the best fit model between 'Normal' and 'Gamma' distribution model to do analysis. The consumption's mean and standard deviation will be calculated.
+* You can adjust the default 90% confidence level to calculate the Recharge Alert or Threshold. For example, you can have 99% for sure the remaining WH is enough for a typical day's usage before recharge. You need this WH level to setup the Panel's alert level.
 * Analysis needs big data. Too few consumption data will result in error.
 * Pull down to refresh the lastest consumption histories and recalculate the recharge alert.
 * Select the 'Share' menu item to share the consumption histories thru your phone's App e.g. Email.
 
 ## Panel
-* The top left box shows the current date, the last data update time and the current
-day's consumption in Watts-Hour
+* The top left box shows the current date, the last data update time and the current day's consumption in Watts-Hour
 * The top right Gauge is current recharge (+ve) and consumption (-ve) Watts.
 * The middle Gauge is the oil gauge showing the remaining energy of your battery.
-You can use the 'Setup' function to adjust your battery's maximum capacity and recharge alert level.
+* If the connection between BatMan App and the HW module is broken, you may tap on the middle Gauge to reconnect. You can also use the 'Setup' function to adjust your battery's maximum capacity and recharge alert level.
 * The bottom left Gauge is current Ampere coming in to or going out from your battery.
 * The bottom right Gauge is current Voltage of your battery.
 * Expect to received update from the BlueTooth device every 5 seconds.
-* Select the 'History' menu item to display the battery's histories. 
-Select the 'Analyze' menu item to analyze the battery's histories. 
-Select the 'Setup' menu item to setup the Panel maximum and alert level.
+* Select the 'History' menu item to display the battery's histories. Select the 'Analyze' menu item to analyze the battery's histories. Select the 'Setup' menu item to setup the Panel maximum and alert level.
 * Select the 'Adjust' menu item to update the BlueTooth device's remaining WH.
 
 ## Adjust
-The remaining energy in WH of your battery is kept inside the flash memory of the
-BlueTooth device. You may need a few recharge cycles to determine the total energy capacity
-of your battery. Under a safe circumstance (e.g. you have a backup battery or you are near
-a recharge station), try to use up your battery but be careful not to drain it out. Then, adjust
-the remainig WH to 0WH and fully recharge your battery. Upon fully recharge, note down
-the remaining WH reading in the Panel. The reading is the Maximum WH of your battery
-that you will be used to Setup your battery's Panel using the Setup function.
+The remaining energy in WH of your battery is kept inside the flash memory of the BlueTooth device. You may need a few recharge cycles to determine the total energy capacity of your battery. Under a safe circumstance (e.g. you have a backup battery or you are near a recharge station), try to use up your battery but be careful not to drain it out. Then, adjust the remainig WH to 0WH and fully recharge your battery. Upon fully recharge, note down the remaining WH reading in the Panel. The reading is the Maximum WH of your battery that you will be used to Setup your battery's Panel using the Setup function.
 
 ## Setup
 * Set the Gauge Max. WH to the value you noted down above.
-* Set the Gauge Alert WH to the value you obtain in the Analyze function above. Recall
-that this is of the certain confidence level that your battery is enough for a typical
-day's usage. A Recharge is required if your battery is falling near this alert level.
+* Set the Gauge Alert WH to the value you obtain in the Analyze function above. Recall that this is of the certain confidence level that your battery is enough for a typical day's usage. A Recharge is required if your battery is falling near this alert level.
 
 # Mac setup
 * Visual Studio for Mac will no longer be supported after August 31, 2024.
