@@ -16,7 +16,6 @@
     </ContentPage.ToolbarItems>
 
     <Grid x:DataType="local:GaugeViewModel">
-        <Label Text="Connecting..." TextColor="Red" IsVisible="{Binding IsConnecting, Mode=TwoWay}" />
         <Grid Margin="2" BackgroundColor="Black" RowSpacing="2" ColumnSpacing="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*" />
@@ -39,6 +38,7 @@
                         <Setter Property="TextColor" Value="Black"/>
                     </Style>
                 </StackLayout.Resources>
+                <Label Text="Connecting..." TextColor="Red" IsVisible="{Binding IsConnecting}" HorizontalOptions="Center" />
                 <Label Text="{Binding DT, StringFormat='{0:dd/MM/yyyy HH:mm:ss}'}"
                        HorizontalOptions="Center"/>
                 <Label Text="Consumption Today" HorizontalOptions="Center"/>
