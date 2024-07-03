@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls.Compatibility.Hosting;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace BatMan2;
@@ -12,11 +13,17 @@ public static class MauiProgram
 			.UseMauiApp<App>()
             .UseSkiaSharp()
             .RegisterServices()
-			.ConfigureFonts(fonts =>
+            .UseMauiCompatibility()
+            .ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-			});
+			})
+            .ConfigureMauiHandlers(handlers => {
+#if IOS
+                handlers.AddCompatibilityRenderer<ContentPage, IOSToolbarExtensionsContentPageRenderer>();
+#endif
+            });
 
 #if DEBUG
 		builder.Logging.AddDebug();
