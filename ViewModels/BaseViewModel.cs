@@ -24,9 +24,8 @@ namespace BatMan2.ViewModels
             set { SetProperty(ref title, value); }
         }
 
-        protected bool SetProperty<T>(ref T backingStore, T value,
-            [CallerMemberName] string propertyName = "",
-            Action onChanged = null)
+        protected bool SetProperty<T>(ref T backingStore, T value, Action onChanged = null,
+            [CallerMemberName] string propertyName = "")
         {
             if (EqualityComparer<T>.Default.Equals(backingStore, value))
                 return false;
@@ -38,7 +37,7 @@ namespace BatMan2.ViewModels
         }
 
         #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             var changed = PropertyChanged;

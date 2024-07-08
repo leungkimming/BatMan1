@@ -1,19 +1,36 @@
 ﻿using CoreGraphics;
 using Foundation;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Controls.Compatibility;
 using Microsoft.Maui.Controls.Compatibility.Platform.iOS;
+using Microsoft.Maui.Handlers;
 using System.Drawing;
 using UIKit;
 
 namespace BatMan2;
-public class IOSToolbarExtensionsContentPageRenderer : PageRenderer {
-    // left hand primary item buttons
-    public static bool EnablePrimaryLeftHandToolbarItemRendering { get; set; } = true;
+public class IOSContentPageHandler : PageHandler {
+    ContentPage? ContentPage => VirtualView as ContentPage;
+    UIViewController? UIVC;
+    public static SecondaryToolbarSettings SecondaryToolbarUserSettings { get; set; } = new SecondaryToolbarSettings();
 
-    private ToolbarItem[] primaryToolbarItems;
+    private bool isDropDownMenuActive;
+    private ToolbarItem[] secondaryToolbarItems;
+    private UIView? transparentCloseDropDownMenuView;
+    private UITapGestureRecognizer? transparentCloseDropDownMenuViewTapRecognizer;
+    private UITableView? toolbarTableView;
+    private ToolbarItem? dropdownMenuToolbarItem;
+    public IOSContentPageHandler() {
+        secondaryToolbarItems = Array.Empty<ToolbarItem>();
+    }
+    protected override void ConnectHandler(Microsoft.Maui.Platform.ContentView nativeView) {
+        base.ConnectHandler(nativeView);
+        SetupPageToolbarMenu();
+        ContentPage.Loaded += OnLoaded;
+    }
 
-    // right hand secondary item toolbar
+    protected override void DisconnectHandler(Microsoft.Maui.Platform.ContentView nativeView) {
+        ContentPage.Loaded -= OnLoaded;
+        RestoreToolbarMenu();
+        base.DisconnectHandler(nativeView);
+    }
     public class SecondaryToolbarSettings {
         public string Icon { get; set; } = "more.png";
 
@@ -39,79 +56,52 @@ public class IOSToolbarExtensionsContentPageRenderer : PageRenderer {
                 (float)(this.Font.Ascender - this.Font.Descender) * 2;
         }
     }
-    public static bool EnableSecondaryToolbarRendering { get; set; } = true;
-    public static SecondaryToolbarSettings SecondaryToolbarUserSettings { get; set; } = new SecondaryToolbarSettings();
-
-    private bool isDropDownMenuActive;
-    private ToolbarItem[] secondaryToolbarItems;
-    private UIView transparentCloseDropDownMenuView;
-    private UITapGestureRecognizer transparentCloseDropDownMenuViewTapRecognizer;
-    private UITableView toolbarTableView;
-
-    private bool hasInited;
-
-    public override void ViewWillAppear(bool animated) {
-        if (!this.hasInited && this.NavigationController != null) {
-            this.hasInited = true;
-
-            var contentPage = (ContentPage)this.Element;
-
-            this.secondaryToolbarItems = contentPage.ToolbarItems.Where(i => i.Order == ToolbarItemOrder.Secondary).OrderBy(b => b.Priority).ToArray();
-            this.SetupRightHandSecondaryItemToolbar();
-
-            this.primaryToolbarItems = contentPage.ToolbarItems.Where(i => i.Order != ToolbarItemOrder.Secondary).OrderBy(b => b.Priority).ToArray();
-            //this.SetupLeftHandPrimaryToolbarItems();
-        }
-
-        base.ViewWillAppear(animated);
-    }
-
-    private void SetupRightHandSecondaryItemToolbar() {
-        if (EnableSecondaryToolbarRendering) {
-            if (this.secondaryToolbarItems.Any()) {
-                var contentPage = (ContentPage)this.Element;
-
-                foreach (var toolbarItem in this.secondaryToolbarItems) {
-                    var commandBak = toolbarItem.Command;
-                    contentPage.ToolbarItems.Remove(toolbarItem);
-                    toolbarItem.Command = commandBak;
-                }
-
-                contentPage.ToolbarItems.Add(new ToolbarItem() {
-                    Order = ToolbarItemOrder.Primary,
-                    Priority = int.MaxValue,
-                    IconImageSource = SecondaryToolbarUserSettings.Icon,
-                    Command = new Command(this.ToggleDropDownMenu)
-                });
+    private void RestoreToolbarMenu() {
+        if (this.secondaryToolbarItems != null) {
+            foreach (var toolbarItem in this.secondaryToolbarItems) {
+                ContentPage.ToolbarItems.Add(toolbarItem);
             }
         }
+        if (this.dropdownMenuToolbarItem != null) {
+            ContentPage.ToolbarItems.Remove(this.dropdownMenuToolbarItem);
+            this.dropdownMenuToolbarItem = null; // Clear the reference
+        }
     }
 
-    public override void ViewDidDisappear(bool animated) {
-        this.CloseDropDownMenu();
+    private void SetupPageToolbarMenu() {
+        IPlatformViewHandler handler = this;
+        UIVC = handler.ViewController;
 
-        base.ViewDidDisappear(animated);
+        if (ContentPage!.ToolbarItems.Any(i => i.Order == ToolbarItemOrder.Secondary)) {
+            this.secondaryToolbarItems = ContentPage.ToolbarItems.Where(i => i.Order == ToolbarItemOrder.Secondary).OrderBy(b => b.Priority).ToArray();
+            foreach (var toolbarItem in this.secondaryToolbarItems) {
+                var commandBak = toolbarItem.Command;
+                ContentPage.ToolbarItems.Remove(toolbarItem);
+                toolbarItem.Command = commandBak;
+            }
+            this.dropdownMenuToolbarItem = new ToolbarItem {
+                Order = ToolbarItemOrder.Primary,
+                Priority = int.MaxValue,
+                IconImageSource = SecondaryToolbarUserSettings.Icon,
+                Command = new Command(this.ToggleDropDownMenu)
+            };
+            ContentPage.ToolbarItems.Add(this.dropdownMenuToolbarItem);
+        }
     }
-
-    public override void ViewDidLayoutSubviews() {
-        base.ViewDidLayoutSubviews();
-
-        if (this.isDropDownMenuActive)
-            this.toolbarTableView.Frame = this.GetPositionForDropDownMenu();
+    private void OnLoaded(object? sender, EventArgs? e) {
+        IPlatformViewHandler handler = this;
+        UIVC = handler.ViewController;
     }
-
     private void OpenDropDownMenu() {
         if (!this.isDropDownMenuActive && secondaryToolbarItems.Length > 0) {
-            System.Diagnostics.Debug.Assert(this.View.Subviews != null && View.Subviews.Length > 0 && View.Bounds != null);
             this.isDropDownMenuActive = true;
 
-            this.transparentCloseDropDownMenuView = new UIView(new CGRect(0, 0, View.Bounds.Width, View.Bounds.Height)) {
+            this.transparentCloseDropDownMenuView = new UIView(new CGRect(0, 0, UIVC!.View!.Bounds.Width, UIVC.View.Bounds.Height)) {
                 BackgroundColor = UIColor.FromRGBA(0, 0, 0, 0)
             };
             this.transparentCloseDropDownMenuViewTapRecognizer = new UITapGestureRecognizer(this.CloseDropDownMenu);
             this.transparentCloseDropDownMenuView.AddGestureRecognizer(transparentCloseDropDownMenuViewTapRecognizer);
-            this.Add(this.transparentCloseDropDownMenuView);
-
+            UIVC.Add(this.transparentCloseDropDownMenuView);
             this.toolbarTableView = new UITableView(this.GetPositionForDropDownMenu()) {
                 Source = new TableSource(this.secondaryToolbarItems, this.CloseDropDownMenu),
                 ClipsToBounds = true,
@@ -126,7 +116,7 @@ public class IOSToolbarExtensionsContentPageRenderer : PageRenderer {
             this.toolbarTableView.Layer.ShadowRadius = SecondaryToolbarUserSettings.ShadowRadius;
             this.toolbarTableView.Layer.ShadowOffset = new Microsoft.Maui.Graphics.SizeF(SecondaryToolbarUserSettings.ShadowOffsetX, SecondaryToolbarUserSettings.ShadowOffsetY);
 
-            this.Add(this.toolbarTableView);
+            UIVC.Add(this.toolbarTableView);
         }
     }
 
@@ -134,16 +124,16 @@ public class IOSToolbarExtensionsContentPageRenderer : PageRenderer {
         if (this.isDropDownMenuActive) {
             this.isDropDownMenuActive = false;
 
-            this.transparentCloseDropDownMenuView.RemoveGestureRecognizer(transparentCloseDropDownMenuViewTapRecognizer);
-            this.transparentCloseDropDownMenuViewTapRecognizer.Dispose();
+            this.transparentCloseDropDownMenuView?.RemoveGestureRecognizer(transparentCloseDropDownMenuViewTapRecognizer!);
+            this.transparentCloseDropDownMenuViewTapRecognizer?.Dispose();
             this.transparentCloseDropDownMenuViewTapRecognizer = null;
 
-            this.toolbarTableView.RemoveFromSuperview();
-            this.toolbarTableView.Dispose();
+            this.toolbarTableView?.RemoveFromSuperview();
+            this.toolbarTableView?.Dispose();
             this.toolbarTableView = null;
 
-            this.transparentCloseDropDownMenuView.RemoveFromSuperview();
-            this.transparentCloseDropDownMenuView.Dispose();
+            this.transparentCloseDropDownMenuView?.RemoveFromSuperview();
+            this.transparentCloseDropDownMenuView?.Dispose();
             this.transparentCloseDropDownMenuView = null;
         }
     }
@@ -156,22 +146,17 @@ public class IOSToolbarExtensionsContentPageRenderer : PageRenderer {
     }
 
     private RectangleF GetPositionForDropDownMenu() {
-        var renderer = Microsoft.Maui.Controls.Compatibility.Platform.iOS.Platform.GetRenderer(Element);
-        var viewController = renderer.ViewController;
-        var h = viewController.NavigationController?.NavigationBar.Frame.Height;
-
         return new RectangleF(
-            (float)this.View.Bounds.Width - SecondaryToolbarUserSettings.ColumnWidth,
+            (float)UIVC.View.Bounds.Width - SecondaryToolbarUserSettings.ColumnWidth,
             0,
-//            (float)h + SecondaryToolbarUserSettings.GetRowHeight() / 2f,
             SecondaryToolbarUserSettings.ColumnWidth,
             this.secondaryToolbarItems.Length * SecondaryToolbarUserSettings.GetRowHeight());
     }
 }
 
 internal class TableSource : UITableViewSource {
-    private ToolbarItem[] toolbarItems;
-    private Action itemSelected;
+    private ToolbarItem[] toolbarItems { get; set; }
+    private Action itemSelected { get; set; }
 
     private const string CellIdentifier = "RightToolbarTableCell";
 
@@ -180,12 +165,12 @@ internal class TableSource : UITableViewSource {
         this.itemSelected = itemSelected;
     }
 
-    public override nint RowsInSection(UITableView tableview, nint section) {
+    public override nint RowsInSection(UITableView tableView, nint section) {
         return this.toolbarItems.Length;
     }
 
     public override nfloat GetHeightForRow(UITableView tableView, NSIndexPath indexPath) {
-        return IOSToolbarExtensionsContentPageRenderer.SecondaryToolbarUserSettings.GetRowHeight();
+        return IOSContentPageHandler.SecondaryToolbarUserSettings.GetRowHeight();
     }
 
     public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath) {
@@ -195,32 +180,32 @@ internal class TableSource : UITableViewSource {
         if (cell == null) {
             cell = new UITableViewCell(UITableViewCellStyle.Default, CellIdentifier);
         }
-        // TODO: is this needed?
-        /*else
-        {
-            if (cell.ImageView.Image != null)
-            {
-                cell.ImageView.Image.Dispose();
-                cell.ImageView.Image = null;
-            }
-        }*/
+        //var cell = tableView.DequeueReusableCell(CellIdentifier) ?? new UITableViewCell(UITableViewCellStyle.Default, CellIdentifier);
+        var contentConfiguration = UIListContentConfiguration.CellConfiguration;
+        contentConfiguration.Text = toolbarItem.Text;
+        contentConfiguration.TextProperties.Font = IOSContentPageHandler.SecondaryToolbarUserSettings.Font;
+        contentConfiguration.ImageProperties.MaximumSize = new CGSize(24, 24); //3 dots image size
 
-        UIImage image = null;
+        UIColor textColor = toolbarItem.IsEnabled ? UIColor.Label : UIColor.SystemGray2;
+        contentConfiguration.TextProperties.Color = textColor;
+
         if (toolbarItem.IconImageSource != null) {
             var imageSourceHandler = GetImageSourceHandler(toolbarItem.IconImageSource);
             if (imageSourceHandler != null) {
                 var imageLoadTask = imageSourceHandler.LoadImageAsync(toolbarItem.IconImageSource);
-                if (imageLoadTask.Status == System.Threading.Tasks.TaskStatus.Created)
-                    imageLoadTask.RunSynchronously();
-                image = imageLoadTask.IsCompletedSuccessfully ? imageLoadTask.Result : null;
+                imageLoadTask.ContinueWith(task => {
+                    if (task.IsCompletedSuccessfully) {
+                        var image = task.Result;
+                        InvokeOnMainThread(() => {
+                            contentConfiguration.Image = image;
+                            cell.ContentConfiguration = contentConfiguration;
+                        });
+                    }
+                });
             }
+        } else {
+            cell.ContentConfiguration = contentConfiguration;
         }
-        cell.ImageView.Image = image;
-
-        cell.TextLabel.Font = IOSToolbarExtensionsContentPageRenderer.SecondaryToolbarUserSettings.Font;
-        cell.TextLabel.Text = toolbarItem.Text;
-
-        cell.TextLabel.Enabled = toolbarItem.IsEnabled;
         cell.UserInteractionEnabled = toolbarItem.IsEnabled;
         return cell;
     }
@@ -232,14 +217,14 @@ internal class TableSource : UITableViewSource {
             toolbarItem.Command.Execute(toolbarItem.CommandParameter);
 
         var onClickedMethodInfo = toolbarItem.GetType().GetMethod("OnClicked", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-        onClickedMethodInfo.Invoke(toolbarItem, new object[0]);
+        onClickedMethodInfo!.Invoke(toolbarItem, new object[0]);
 
         tableView.DeselectRow(indexPath, true);
 
         this.itemSelected?.Invoke();
     }
 
-    private static IImageSourceHandler GetImageSourceHandler(ImageSource source) {
+    private static IImageSourceHandler? GetImageSourceHandler(ImageSource source) {
         if (source is UriImageSource)
             return new ImageLoaderSourceHandler();
         if (source is FileImageSource)
@@ -249,3 +234,4 @@ internal class TableSource : UITableViewSource {
         return null;
     }
 }
+

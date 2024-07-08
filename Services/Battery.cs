@@ -40,18 +40,18 @@ namespace BatMan2.Services
 
         private bool canScan, canUpdate, isConnected, isConnecting;
         private ObservableCollection<IDevice> deviceList = new ObservableCollection<IDevice>();
-        private IDevice connectedDevice;
+        private IDevice? connectedDevice = null;
         private IBluetoothLE ble;
         private IAdapter adapter;
-        private IReadOnlyList<IService> Services;
-        private IService Service;
+        //private IReadOnlyList<IService> Services;
+        private IService? Service = null;
 
         private IReadOnlyList<ICharacteristic> Characteristics;
         private ICharacteristic Characteristic;
         private ICharacteristic Characteristic_update;
         private System.Timers.Timer _Reconnect_timer;
         private int BLE_Count = 0;
-        CancellationTokenSource token = null;
+        CancellationTokenSource token = new CancellationTokenSource();
 
         public BatManBattery()
         {
@@ -171,7 +171,7 @@ namespace BatMan2.Services
             _Reconnect_timer.Enabled = false;
             try
             {
-                await ConnectAsync(connectedDevice);
+                await ConnectAsync(connectedDevice!);
             }
             catch (Exception ex)
             {
@@ -179,7 +179,7 @@ namespace BatMan2.Services
             }
         }
 
-        private void OnCheckConnection(object sender, ElapsedEventArgs e)
+        private void OnCheckConnection(object? sender, ElapsedEventArgs e)
         {
             Task.Run(() => this.CheckConnection()).Wait();
         }
@@ -237,10 +237,13 @@ namespace BatMan2.Services
             ConnectParameters cp = new ConnectParameters();
             isConnecting = true;
             token = new CancellationTokenSource();
-            if (Device.RuntimePlatform == Device.iOS) {
+            if (DeviceInfo.Platform == DevicePlatform.iOS) {
                 await adapter.ConnectToDeviceAsync(item, cp, token.Token);
             } else {
-                await Device.InvokeOnMainThreadAsync(async () => {
+                //await Device.InvokeOnMainThreadAsync(async () => {
+                //    await adapter.ConnectToDeviceAsync(item, cp, token.Token);
+                //});
+                Application.Current.Dispatcher.Dispatch(async () => {
                     await adapter.ConnectToDeviceAsync(item, cp, token.Token);
                 });
             }
@@ -249,7 +252,7 @@ namespace BatMan2.Services
             canUpdate = true;
             try
             {
-                Services = await item.GetServicesAsync();
+                IReadOnlyList<IService> Services = await item.GetServicesAsync();
                 Service = Services.FirstOrDefault(s => s.Id == SERVICE_UUID);
                 if (Service == null) {
                     throw new Exception("Service UUID not found!");

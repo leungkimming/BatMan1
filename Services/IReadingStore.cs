@@ -14,8 +14,8 @@ namespace BatMan2.Services
         Task<int> AddReadingAsync(T item);
         Task<IEnumerable<T>> GetReadingsAsync(string batt = "");
         Task<IEnumerable<Consumption>> GetConsumptionsAsync(string batt, bool today = false);
-        Task<string[]> GetBatteriesAsync();
-        Task<bool> ClearDBAsync(string battery);
+        Task<string?[]> GetBatteriesAsync();
+        Task<bool> ClearDBAsync(string? battery);
         Task<bool> LoadDB();
         Task<bool> Compress(DateTime before);
     }

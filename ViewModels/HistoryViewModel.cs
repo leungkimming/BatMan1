@@ -56,7 +56,7 @@ namespace BatMan2.ViewModels
             try
             {
                 var items = await ReadingStore.GetReadingsAsync();
-                string[] batterys = null;
+                string?[] batterys = null;
 
                 if (Battery.ConnectedDevice == null)
                 {
@@ -68,7 +68,7 @@ namespace BatMan2.ViewModels
 
                 foreach (string bat in batterys)
                 {
-                    Items.Add(new ReadingGroup(bat,
+                    Items.Add(new ReadingGroup(bat!,
                         new ObservableCollection<Reading>(
                             items.Where(x => x.Battery == bat))));
                 }

@@ -29,7 +29,7 @@ namespace BatMan2.Models
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }
         [Indexed]
-        public string Battery { get; set; }
+        public string? Battery { get; set; }
         [Indexed]
         public DateTime DT { get; set; }
         public double V { get; set; }

@@ -14,7 +14,7 @@ namespace BatMan2.ViewModels
     [QueryProperty(nameof(BatteryName), nameof(BatteryName))]
     public class AnalysisViewModel : BaseViewModel
     {
-        private Reading[] _Readings;
+        //private Reading[] _Readings;
 
         private ObservableCollection<Consumption> _Items;
         public ObservableCollection<Consumption> Items
@@ -160,7 +160,7 @@ namespace BatMan2.ViewModels
 
             try
             {
-                string[] batterys = null;
+                string?[] batterys = null;
 
                 if (BatteryName == "")
                 {
@@ -173,7 +173,7 @@ namespace BatMan2.ViewModels
 
                 foreach (string bat in batterys)
                 {
-                    var con = await ReadingStore.GetConsumptionsAsync(bat);
+                    var con = await ReadingStore.GetConsumptionsAsync(bat!);
                     _Items = new ObservableCollection<Consumption>(_Items.Concat(con));
                 }
             }
@@ -237,7 +237,7 @@ namespace BatMan2.ViewModels
                     });
                 }
                 int labelsize = 18;
-                if (Device.RuntimePlatform == Device.Android) {
+                if (DeviceInfo.Platform == DevicePlatform.Android) {
                     labelsize = 22;
                 }
                 Chart = new BarChart()
@@ -253,7 +253,7 @@ namespace BatMan2.ViewModels
                     //YAxisMaxTicks = 5,
                     //YAxisPosition = Position.Left,
                 };
-            } catch (Exception e)
+            } catch
             {
                 Error = "Not enough > 10Whr. Consumptions!";
             }

@@ -21,7 +21,7 @@ public static class MauiProgram
 			})
             .ConfigureMauiHandlers(handlers => {
 #if IOS
-                handlers.AddCompatibilityRenderer<ContentPage, IOSToolbarExtensionsContentPageRenderer>();
+                handlers.AddHandler<ContentPage, IOSContentPageHandler>();
 #endif
             });
 

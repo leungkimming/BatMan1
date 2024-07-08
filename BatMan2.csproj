@@ -39,16 +39,19 @@
 	  <!--For hot restart-->
 	  <!--<MtouchLink>None</MtouchLink>-->
 	  <MtouchDebug>True</MtouchDebug>
+	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
 	  <ApplicationId>com.kmleung.Batman4</ApplicationId>
 	  <ApplicationTitle>BatMan2</ApplicationTitle>
+	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
 	  <ApplicationId>com.kmleung.Batman4</ApplicationId>
 	  <ApplicationTitle>BatMan2</ApplicationTitle>
+	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-ios|AnyCPU'">
@@ -56,6 +59,7 @@
 	  <ApplicationTitle>BatMan2</ApplicationTitle>
 	  <MtouchDebug>True</MtouchDebug>
 	  <MtouchLink>SdkOnly</MtouchLink>
+	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net8.0-android'">
@@ -129,15 +133,12 @@
 	  <MauiXaml Update="Views\UpdatePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+		<MauiXaml Update="View\DevicePage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	</ItemGroup>
 
-	 <!--<ItemGroup>
-	  <MauiXaml Update="View\DevicePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>--> 
-	
 	<PropertyGroup>
 		<MtouchInterpreter>-all</MtouchInterpreter>
-	</PropertyGroup>
+	</PropertyGroup> 
 </Project>

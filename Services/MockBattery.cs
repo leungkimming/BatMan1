@@ -87,14 +87,14 @@ namespace BatMan2.Services
         private bool canScan, canUpdate, isConnected;
         private ObservableCollection<IDevice> deviceList = new ObservableCollection<IDevice>();
         private IDevice connectedDevice;
-        private IBluetoothLE ble;
-        private IAdapter adapter;
-        private IReadOnlyList<IService> Services;
-        private IService Service;
+        //private IBluetoothLE ble;
+        //private IAdapter adapter;
+        //private IReadOnlyList<IService> Services;
+        //private IService Service;
 
-        private IReadOnlyList<ICharacteristic> Characteristics;
-        private ICharacteristic Characteristic;
-        private ICharacteristic Characteristic_update;
+        //private IReadOnlyList<ICharacteristic> Characteristics;
+        //private ICharacteristic Characteristic;
+        //private ICharacteristic Characteristic_update;
 
         private System.Timers.Timer _timer;
         private Random RAND = new Random();
@@ -281,7 +281,7 @@ namespace BatMan2.Services
             DeviceFound?.Invoke(this, e);
         }
 
-        public async void CheckConnection()
+        public void CheckConnection()
         {
         }
 

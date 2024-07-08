@@ -67,7 +67,7 @@ namespace BatMan2.Controls
 
         // Properties for the Colors
         public static readonly BindableProperty GaugeLineColorProperty =
-            BindableProperty.Create("GaugeLineColor", typeof(Color), typeof(Gauge), Color.FromHex("#70CBE6"));
+            BindableProperty.Create("GaugeLineColor", typeof(Color), typeof(Gauge), Color.FromArgb("#70CBE6"));
 
         public Color GaugeLineColor
         {
@@ -76,7 +76,7 @@ namespace BatMan2.Controls
         }
 
         public static readonly BindableProperty ValueColorProperty =
-            BindableProperty.Create("ValueColor", typeof(Color), typeof(Gauge), Color.FromHex("FF9A52"));
+            BindableProperty.Create("ValueColor", typeof(Color), typeof(Gauge), Color.FromArgb("FF9A52"));
 
         public Color ValueColor
         {
@@ -85,7 +85,7 @@ namespace BatMan2.Controls
         }
 
         public static readonly BindableProperty RangeColorProperty =
-            BindableProperty.Create("RangeColor", typeof(Color), typeof(Gauge), Color.FromHex("#E6F4F7"));
+            BindableProperty.Create("RangeColor", typeof(Color), typeof(Gauge), Color.FromArgb("#E6F4F7"));
 
         public Color RangeColor
         {
@@ -341,7 +341,7 @@ namespace BatMan2.Controls
             canvas.Restore();
         }
 
-        protected override void OnPropertyChanged(string propertyName = null)
+        protected override void OnPropertyChanged(string? propertyName = null)
         {
             base.OnPropertyChanged(propertyName);
 

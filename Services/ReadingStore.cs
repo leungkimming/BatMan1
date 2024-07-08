@@ -86,7 +86,7 @@ namespace BatMan2.Services
                 rows = await db.InsertAsync(item);
                 LastDeviceName = item.Battery;
                 LastHistoryDate = item.DT;
-            } catch (Exception ex)
+            } catch
             {
                 rows = -1;
             }
@@ -94,7 +94,7 @@ namespace BatMan2.Services
             return rows;
         }
 
-        public async Task<bool> ClearDBAsync(string Device)
+        public async Task<bool> ClearDBAsync(string? Device)
         {
             bool res = false;
             try
@@ -157,7 +157,7 @@ namespace BatMan2.Services
             return Readings2Consumption(items);
         }
 
-        public async Task<string[]> GetBatteriesAsync()
+        public async Task<string?[]> GetBatteriesAsync()
         {
             var items = await this.GetReadingsAsync();
             return items.Select(x => x.Battery).Distinct().OrderBy(y => y).ToArray();
