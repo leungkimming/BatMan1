@@ -15,7 +15,7 @@
       x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
       https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
     -->
-    <VerticalStackLayout x:DataType="local:AnalysisViewModel">
+    <StackLayout x:DataType="local:AnalysisViewModel">
         <Label Text="{Binding Error}" HorizontalOptions="Center" TextColor="Red"/>
         <Grid>
             <Grid.RowDefinitions>
@@ -93,5 +93,5 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </RefreshView>
-    </VerticalStackLayout>
+    </StackLayout>
 </ContentPage>

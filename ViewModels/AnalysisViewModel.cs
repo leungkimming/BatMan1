@@ -14,8 +14,6 @@ namespace BatMan2.ViewModels
     [QueryProperty(nameof(BatteryName), nameof(BatteryName))]
     public class AnalysisViewModel : BaseViewModel
     {
-        //private Reading[] _Readings;
-
         private ObservableCollection<Consumption> _Items;
         public ObservableCollection<Consumption> Items
         {

@@ -41,8 +41,9 @@ namespace BatMan2.ViewModels
             }
         }
 
-        public UpdateViewModel()
+        public UpdateViewModel(IReadingStore<Reading> readingstore)
         {
+            ReadingStore = readingstore;
             Message = "Please enter a value from 0-999";
             UpdateBatteryCommand = new Command(OnUpdateBattery);
         }
