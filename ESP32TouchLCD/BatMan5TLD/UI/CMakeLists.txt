@@ -1,0 +1,9 @@
+SET(SOURCES ui_HomeLD.c
+    ui_BatManLD.c
+    ui_ResetDailyLD.c
+    ui_BatteryMaxLD.c
+    ui.c
+    ui_comp_hook.c
+    ui_helpers.c)
+
+add_library(ui ${SOURCES})

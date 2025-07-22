@@ -1,0 +1,95 @@
+# Arduino IDE files
+*.tmp
+*.bak
+*.swp
+*.dsYM
+
+# Arduino build output
+build/
+*.bin
+*.elf
+*.hex
+*.map
+
+# ESP32 specific
+*.flash_args
+*.partition
+*.bootloader
+
+# CMake build files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+*.vcxproj*
+*.sln
+*.filters
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Temporary files
+*~
+*.orig
+*.rej
+*.tmp
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Windows
+*.lnk
+
+# Backup files
+backup/
+*.zip
+*_backup*
+
+# SquareLine Studio files (keeping project files but ignoring cache/temp)
+cache/
+*.cache
+
+# Component libraries (if using external components)
+components/esp-idf/
+components/arduino/
+
+# Python bytecode (for build scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node modules (if using any JS tools)
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# IDE specific
+*.sublime-project
+*.sublime-workspace
+.idea/
+*.iml
+
+# Platformio
+.pio/
+.pioenvs/
+.piolibdeps/
+lib_deps/
+
+# ESP-IDF specific
+sdkconfig.old
+dependencies.lock
+managed_components/

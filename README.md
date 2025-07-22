@@ -1,13 +1,19 @@
 # Introduction 
 To a person with physical disabilities, a proper functioning wheelchair is of paramount importance, especially the battery being the heart of the wheelchair. Unfortunately, the only indicator of the battery's remaining capacity is the voltage on the display panel. Voltage is obvisouly not an accurate measurement of its remaining capacity, as it is not linearly proprotional to the remaining capacity and may sometimes be misleading (e.g. Recovery effect). A better alternatvie is coulomb counting, which counts the actual energy in and out.
 
-# The ultimate goal -- The (Bat)tery (Man)ager BatMan App
+# The 1st goal -- The (Bat)tery (Man)ager BatMan App
 To develop an IOS/Android App to display battery's remaining capacity; current and today's power consumption, current Amperes and voltage output in realtime.
 ![BatMan App - Main Penal](/ESPBatMan3/HW/Panel.png)
 The daily consumption history data forms a normal distribution to predict if a recharge is needed
 ![BatMan App - Analytic](/ESPBatMan3/HW/Analyze.png)
 Share the consumption history data as a csv file with other Apps
 ![BatMan App - Data Sharing](/ESPBatMan3/HW/Share.png)
+
+# The 2nd goal -- The (Bat)tery (Man)ager BatMan5T ESP32 LCD Module
+To develop a hardware to display battery's remaining capacity; current and today's power consumption, current Amperes and voltage output in realtime. It has a IMU to auto adjust screen orientation and touch screen for users to interact with.
+* BatMan5T: Main Arduino project with SquareLine project for Portriat deesign.
+* BatMan5TLD: SquareLine project for Landscape deesign
+
 
 # Coulomb counting basics
 ## Watt-Hour calculation
