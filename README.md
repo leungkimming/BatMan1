@@ -11,9 +11,10 @@ Share the consumption history data as a csv file with other Apps
 
 # The 2nd goal -- The (Bat)tery (Man)ager BatMan5T ESP32 LCD Module
 To develop a hardware to display battery's remaining capacity; current and today's power consumption, current Amperes and voltage output in realtime. It has a IMU to auto adjust screen orientation and touch screen for users to interact with.
-* BatMan5T: Main Arduino project with SquareLine project for Portriat deesign.
+* BatMan5T: Main Arduino project code with SquareLine project for Portriat deesign.
 * BatMan5TLD: SquareLine project for Landscape deesign
-
+* [ESP32-S3-LCD-2 development guide](https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-2) 
+* Schematic diagram and pinout PDF in BatMan5T/WH folder
 
 # Coulomb counting basics
 ## Watt-Hour calculation
