@@ -63,23 +63,29 @@ namespace BatMan2.Services
             return Task.FromResult<IReadOnlyList<IService>>(null);
         }
 
-        Task<int> IDevice.RequestMtuAsync(int requestValue)
+        Task<int> IDevice.RequestMtuAsync(int requestValue, CancellationToken cancellationToken)
         {
             return Task.FromResult(0);
         }
 
         bool IDevice.UpdateConnectionInterval(ConnectionInterval interval)
         {
-            throw new NotImplementedException();
+            return true; // Mock implementation
         }
 
-        Task<bool> IDevice.UpdateRssiAsync()
+        Task<bool> IDevice.UpdateRssiAsync(CancellationToken cancellationToken)
         {
             return Task.FromResult(true);
         }
-        bool IDevice.UpdateConnectionParameters(ConnectParameters parameters) {
-            // Mock implementation, assuming parameters are always successfully updated.
-            throw new NotImplementedException();
+
+        void IDevice.ClearServices()
+        {
+            // Mock implementation - no services to clear
+        }
+
+        bool IDevice.UpdateConnectionParameters(ConnectParameters parameters) 
+        {
+            return true; // Mock implementation
         }
     }
 

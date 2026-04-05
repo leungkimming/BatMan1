@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
+		<TargetFrameworks>net10.0-android;net10.0-ios</TargetFrameworks>
 		<OutputType>Exe</OutputType>
 		<RootNamespace>BatMan2</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -19,20 +19,21 @@
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<!-- Enable Hot Restart for iOS -->
-		<!--<UseMauiHotRestart>true</UseMauiHotRestart>--> 
+		<!--<UseMauiHotRestart>true</UseMauiHotRestart>-->
+		<ValidateXcodeVersion>false</ValidateXcodeVersion>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
+	<PropertyGroup Condition="'$(TargetFramework)'=='net10.0-ios'">
 	  <ProvisioningType>manual</ProvisioningType>
 		<CodesignKey>Apple Development: micl@hkstar.com (2LC46WTT84)</CodesignKey>
-		<CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+		<CodesignEntitlements>Platforms\iOS\Entitlements.plist</CodesignEntitlements>
 		<CodesignProvision>iOS Team Provisioning Profile: com.kmleung.Batman4</CodesignProvision>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-ios|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-ios|AnyCPU'">
 	  <ApplicationId>com.kmleung.Batman4</ApplicationId>
 	  <ApplicationTitle>BatMan2</ApplicationTitle>
 	  <MtouchLink>SdkOnly</MtouchLink>
@@ -42,19 +43,19 @@
 	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-android|AnyCPU'">
 	  <ApplicationId>com.kmleung.Batman4</ApplicationId>
 	  <ApplicationTitle>BatMan2</ApplicationTitle>
 	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-android|AnyCPU'">
 	  <ApplicationId>com.kmleung.Batman4</ApplicationId>
 	  <ApplicationTitle>BatMan2</ApplicationTitle>
 	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-ios|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net10.0-ios|AnyCPU'">
 	  <ApplicationId>com.kmleung.Batman4</ApplicationId>
 	  <ApplicationTitle>BatMan2</ApplicationTitle>
 	  <MtouchDebug>True</MtouchDebug>
@@ -62,11 +63,11 @@
 	  <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8618;CS8622;CS8625</NoWarn>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)'=='net8.0-android'">
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" BaseSize="1024,1024" ForegroundScale="0.65" />
+	<ItemGroup Condition="'$(TargetFramework)'=='net10.0-android'">
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#1a1a1a" BaseSize="1024,1024" ForegroundScale="0.65" />
 	</ItemGroup>
-	<ItemGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" BaseSize="1024,1024" />
+	<ItemGroup Condition="'$(TargetFramework)'=='net10.0-ios'">
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#1a1a1a" BaseSize="1024,1024" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -93,17 +94,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.100" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-		<PackageReference Include="Plugin.BLE" Version="3.1.0" />
-		<PackageReference Include="Sylvan.Data.Csv" Version="1.1.7" />
-		<PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
-		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.2" />
-		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="2.88.6" />
-		<PackageReference Include="Microcharts.Maui" Version="1.0.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.51" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.51" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.5" />
+		<PackageReference Include="Plugin.BLE" Version="3.2.0" />
+		<PackageReference Include="Sylvan.Data.Csv" Version="1.4.3" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.11" />
+		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.2" />
+		<PackageReference Include="Microcharts.Maui" Version="1.0.1" />
 		<PackageReference Include="Accord.Statistics" Version="3.8.0" />
-		<PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="8.0.14" />
+		<!--<PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.5" />-->
 	</ItemGroup>
 
 	<ItemGroup>
