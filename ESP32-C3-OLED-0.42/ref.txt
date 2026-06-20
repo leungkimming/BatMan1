@@ -1,0 +1,8 @@
+https://docs.zephyrproject.org/latest/boards/01space/esp32c3_042_oled/doc/index.html
+
+https://www.amazon.com/ESP32-C3-0-42-inch-Development-Board-Supermini/dp/B0F379KDBK?th=1
+
+https://github.com/peff74/ESP32-C3_OLED
+
+
+https://emalliab.wordpress.com/2025/02/12/esp32-c3-0-42-oled/

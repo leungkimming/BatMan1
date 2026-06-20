@@ -1,0 +1,17 @@
+electric wheelchair battery management by coulomb counting.
+components:
+- B1:24-29v battery in original wheelchair circuit (do not break warranty)
+- B1 29v and GND taken from charging plug
+	- R2, R3, C1, R1 divide 29v to within 3.3v and feed to EPS32 IO34 to measure (V)
+	- OKI78SR5 regulator to supply stable 5v
+- YMKH16 hall-effect measure red cable from battery (contactless measure) 
+	- wheelchair at rest is 2.0553v. when moving will drop below 2.0553v and when recharging will climb above 2.0553v.
+	- feed to ESP32 IO35 with C1 to measure current (+/- A) Amp in/out
+	- C4, Q1 closes and feed GND to TDO (GPIO15 pull high internally) to wake up ESP32 after long time low current hibernation. No need to consider wake up during recharging because I need to unplug and plug in again anyway and this will reboot ESP32.
+
+Vbe @5V 2ma min=0.58 typical=0.63, max=0.7
+
+1M,680k,470k,300k,220k,100k,68k,51k,47k,20k,10k,6.8k,5.1k,4.7k,3.3k,2.2k,2k,1k
+p7f9gpkp
+3ndpc7mc
+02858487

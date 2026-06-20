@@ -16,7 +16,6 @@ constexpr uint16_t AVERAGE_SAMPLES = 128;
 // Ratio = (R1 + R2) / R2 = 11.0
 constexpr float DIVIDER_RATIO = 11.0f;
 
-
 float readVoltageAverageV(int pin, uint16_t samples) {
   uint32_t sumMv = 0;
   for (uint16_t i = 0; i < samples; i++) {
@@ -26,12 +25,48 @@ float readVoltageAverageV(int pin, uint16_t samples) {
   return (sumMv / static_cast<float>(samples)) / 1000.0f;
 }
 
+class YMKH16D_Sensor {
+public:
+  void init() {
+    analogReadResolution(12);
+    analogSetAttenuation(ADC_11db);
+  }
+
+  // Returns battery voltage in Volts
+  float getBusVoltage_V() {
+    float vBatPin = readVoltageAverageV(VBAT_PIN, AVERAGE_SAMPLES);
+    return vBatPin * DIVIDER_RATIO;
+  }
+
+  // Returns current in milliamps (positive = discharge, negative = charge)
+  float getCurrent_mA() {
+    float vOut = readVoltageAverageV(HALL_PIN, AVERAGE_SAMPLES);
+    float deltaV = VZERO_V - vOut; // Reversed math for flipped wire
+    float i_A = deltaV / G_V_PER_A;
+    float i_mA = i_A * 1000.0f;
+
+    // Add 0A deadzone below 40mA to hide noise
+    if (abs(i_mA) < 40.0f) {
+      return 0.0f;
+    }
+    return i_mA;
+  }
+
+  // Returns power in Watts (positive = discharging, negative = charging)
+  float getBusPower() {
+    float v = getBusVoltage_V();
+    float i_A = getCurrent_mA() / 1000.0f;
+    return v * i_A;
+  }
+};
+
+YMKH16D_Sensor ymkh16d;
+
 void setup() {
   Serial.begin(115200);
   delay(1200);
 
-  analogReadResolution(12);
-  analogSetAttenuation(ADC_11db);
+  ymkh16d.init();
 
   Serial.println();
   Serial.println("=== YMKH16D Continuous Current Measurement ===");
@@ -45,22 +80,15 @@ void setup() {
 }
 
 void loop() {
-  float vOut = readVoltageAverageV(HALL_PIN, AVERAGE_SAMPLES);
-  float vBatPin = readVoltageAverageV(VBAT_PIN, AVERAGE_SAMPLES);
+  // Use the wrapper class to mimic the original INA226 calls exactly
+  int16_t int16_mV = ymkh16d.getBusVoltage_V() * 1000.00;
+  int16_t int16_mA = ymkh16d.getCurrent_mA() * -1;
+  int32_t int32_mW00 = ymkh16d.getBusPower() * 100.000;
 
-  float deltaV = VZERO_V - vOut; // Reversed math for flipped wire
-  float i_A = deltaV / G_V_PER_A;
-  float i_mA = i_A * 1000.0f;
-
-  float vBat = vBatPin * DIVIDER_RATIO;
-  float p_W = vBat * i_A;
-
-  // Add 0A deadzone below 40mA to hide noise
-  if (abs(i_mA) < 40.0f) {
-    i_A = 0.0f;
-    i_mA = 0.0f;
-    p_W = 0.0f;
-  }
+  // Added conversion back for print verification
+  float vBat = int16_mV / 1000.0f;
+  float i_A = int16_mA / -1000.0f;
+  float p_W = int32_mW00 / 100.0f;
 
   Serial.print("Vbat=");
   Serial.print(vBat, 2);

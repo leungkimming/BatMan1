@@ -1,0 +1,12 @@
+https://www.waveshare.com/esp32-c6-touch-lcd-1.69.htm?srsltid=AfmBOopMfL_FpadoLQCLPNHx-9jefcgHautIizUXCPVkX-bdsTfj7qf1
+
+https://www.hackster.io/ElectroScopeArchive/offline-esp32-voice-recognition-with-edge-impulse-fc93c9#toc-step-1--dataset-collection-2
+
+https://github.com/Circuit-Digest/ESP32-Voice-Control-Using-Edge-Impulse
+
+fritzing
+
+https://www.tinkercad.com/circuits
+
+https://gemini.google.com/share/c6757e8e381f
+

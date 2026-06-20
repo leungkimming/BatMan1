@@ -1,4 +1,17 @@
-Michael Leung 
+Board: EPS32 Dev Module
+Port COM3 (ESP32 Family Device)
+Memory: No OTA (2MB APP/2MB FATFS)
+USB CDC On Boot: "Enabled"
+lvgl: replace C:\Users\Micl\Documents\Arduino\libraries\lvgl_libraries\lvgl
+with C:\Users\Micl\Documents\Arduino\libraries\lvgl_libraries\lvgl_8.3.10
+
+https://docs.waveshare.com/ESP32-C6-LCD-1.47/Development-Environment-Setup-Arduino
+
+https://spotpear.com/wiki/ESP32-C6-1.47-inch-LCD-Display-Screen-LVGL-SD-WIFI6-ST7789.html
+
+https://github.com/AndroidCrypto/ESP32_C6_Waveshare_ST7789_Starter
+
+
 
 Follow https://www.youtube.com/watch?v=KEcr22qZAVE&t=76s
 

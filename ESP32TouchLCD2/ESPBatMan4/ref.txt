@@ -1,0 +1,331 @@
+https://www.waveshare.com/wiki/ESP32-S3-Touch-LCD-2
+
+https://www.aliexpress.com/i/1005006734077113.html#nav-specification
+https://item.taobao.com/item.htm?_u=t2dmg8j26111&id=668744700928&spm=a1z0k.7385961.1997985097.d4918997.5d6f37det6P2zz&skuId=4818470073246
+https://www.robotics.org.za/HSTS016L-10A
+
+
+Perplexity answer:
+Here’s a simple Arduino setup for a 10A Hall effect current sensor like the YMKH16:
+
+*Circuit:*
+1. Connect VCC of sensor to 5V on Arduino.
+2. GND of sensor to GND on Arduino.
+3. Sensor’s analog output (usually labeled OUT or Vout) to A0 pin on Arduino.
+4. Run the wire (up to 10A) through the sensor’s current hole.
+
+*Sample code:*
+
+const int sensorPin = A0; // Sensor output connected to A0
+float sensorValue;
+float current;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  sensorValue = analogRead(sensorPin);
+  // Convert analog reading to voltage (assuming 5V and 10-bit ADC)
+  float voltage = sensorValue * (5.0 / 1023.0);
+  // Example calibration for a 10A sensor, adjust multiplier as per your sensor’s datasheet
+  current = (voltage - 2.5) / 0.066;
+  Serial.print("Current: ");
+  Serial.print(current);
+  Serial.println(" A");
+  delay(1000);
+}
+
+*Remember to check your sensor’s datasheet for the exact formula—0.066 is a common sensitivity for 10A sensors (66mV/A), but double-check for YMKH16.*
+
+Would you like details on visualizing readings, or more info about wiring? 🔌
+
+
+RTC
+https://github.com/Bill2462/PCF8563-Arduino-Library/blob/master/examples/simple/simple.ino
+PCF8563 PCF8563T 8563 IIC Real Time Clock RTC Module Board F
+
+https://www.espboards.dev/sensors/pcf8563/
+--------------------------
+
+下面我给你一份 **可直接用于 Arduino** 的示例代码，用来读取 **开环霍尔电流传感器 YMKH16 10A/2V（开合式）** 的电流值。  
+这种传感器通常是 **0–10A 输入，对应 0–2V 输出**，而 Arduino 的 ADC 是 **0–5V**，所以你需要：
+
+- **把传感器输出接到 Arduino A0**
+- **GND 接 GND**
+- **传感器电源按说明书（一般 5V 或 12V）**
+
+---
+
+# ✅ Arduino 示例代码（适用于 YMKH16 10A/2V）
+
+```cpp
+// YMKH16 10A/2V 霍尔电流传感器读取示例
+// 输入电流 0~10A → 输出电压 0~2V → Arduino ADC 0~1023
+
+const int sensorPin = A0;
+
+// 传感器参数
+const float sensorMaxCurrent = 10.0;   // 最大电流 10A
+const float sensorMaxVoltage = 2.0;    // 最大输出 2V
+const float adcReference = 5.0;        // Arduino ADC 参考电压 5V
+const int adcMax = 1023;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  int adcValue = analogRead(sensorPin);
+
+  // ADC 转电压
+  float voltage = (adcValue * adcReference) / adcMax;
+
+  // 电压映射到电流（线性）
+  float current = (voltage / sensorMaxVoltage) * sensorMaxCurrent;
+
+  Serial.print("ADC = ");
+  Serial.print(adcValue);
+  Serial.print("  Voltage = ");
+  Serial.print(voltage, 3);
+  Serial.print(" V  Current = ");
+  Serial.print(current, 3);
+  Serial.println(" A");
+
+  delay(500);
+}
+```
+
+---
+
+# 📌 说明
+
+### 1. 电压 → 电流换算  
+传感器输出是线性的：
+
+\[
+I = \frac{V_{out}}{2.0} \times 10A
+\]
+
+### 2. Arduino ADC 换算  
+\[
+V = \frac{ADC}{1023} \times 5V
+\]
+
+### 3. 如果你用的是 **Arduino 3.3V**  
+把 `adcReference` 改成 `3.3` 即可。
+
+---
+
+# 🔧 如果你想要更稳定的读数（推荐）
+
+我可以帮你加入：
+
+- **多次采样平均**
+- **零点校准**
+- **滤波（移动平均 / 卡尔曼）**
+
+---
+
+如果你愿意，我也可以根据你淘宝购买的那款 YMKH16 的具体说明书，帮你做 **更精确的校准版本**。
+
+当然可以，我给你一个 **清晰、可直接照着接线的电路图（ASCII 版）**，适用于：
+
+- **YMKH16 开环霍尔电流传感器（10A/2V 输出）**
+- **Arduino UNO / Nano / Mega**
+
+虽然我不能画图片，但我可以给你一个结构非常清晰的电路图示意，你照着接线就不会错。
+
+---
+
+# 🔌 **YMKH16 → Arduino 电路连接图（ASCII 示意图）**
+
+```
+          +-----------------------------+
+          |   YMKH16 开环霍尔传感器     |
+          |                             |
+          |   (红) VCC  ---- +5V        |
+          |   (黑) GND  ---- GND        |
+          |   (黄) OUT  ---- A0         |
+          +-----------------------------+
+
+                    │
+                    │ OUT (0~2V)
+                    ▼
+
+        +--------------------------------+
+        |          Arduino UNO           |
+        |                                |
+        |   A0  <----- 传感器 OUT        |
+        |   5V  <----- 传感器 VCC        |
+        |   GND <----- 传感器 GND        |
+        +--------------------------------+
+```
+
+---
+
+# 📌 **接线说明**
+
+| 传感器线 | 接 Arduino | 说明 |
+|---------|------------|------|
+| 红线 VCC | 5V | 传感器供电（一般 5V） |
+| 黑线 GND | GND | 共地 |
+| 黄线 OUT | A0 | 输出 0–2V 对应 0–10A |
+
+---
+
+# ⚡ 电流方向（重要）
+
+YMKH16 是 **开环霍尔开合式**，你把电线穿过传感器的磁环即可。
+
+- 电流方向会影响输出电压是否上升或下降  
+- 但你这款是 **单极性 0–2V 输出**，所以只会 **0→2V 线性变化**
+
+---
+
+# 🧪 推荐你加一个简单滤波（可选）
+
+如果你需要，我可以给你：
+
+- **多次采样平均版**
+- **移动平均滤波版**
+- **零点校准版（补偿传感器偏移）**
+
+---
+
+如果你愿意，我也可以根据你淘宝订单里的那款 YMKH16 的具体参数，帮你画 **更精确的电路图** 或 **加入保护电路（如分压、RC 滤波）**。
+
+--------------------
+
+Great — thanks for sharing the **ESP32‑S3 Touch LCD 2** board details. With your **30 V battery**, **OKI78SR‑5/1.5‑W36C** regulator, and **YMKH16 (10 A / 2 V)** current sensor, here’s a **clean, safe, and proven way** to measure **battery voltage and current** on this board.
+
+---
+
+## 1) Power architecture (important first)
+
+### Battery → 5 V rail
+- **Battery + (30 V)** → **OKI78SR VIN**
+- **Battery −** → **OKI78SR GND**
+- **OKI78SR VOUT (5 V)** → **ESP32 board 5V pin**
+- **Common ground**: battery − = OKI GND = ESP32 GND = YMKH16 GND
+
+The OKI78SR‑5/1.5‑W36C accepts **7–36 V input** and outputs **regulated 5 V**, which is perfect for your 30 V battery .
+
+Your **ESP32‑S3 Touch LCD 2** board has a **5 V pin** and an onboard DC/DC, so feeding it 5 V is correct.
+
+---
+
+## 2) Measuring battery voltage (30 V → ESP32 ADC)
+
+ESP32 ADC pins must stay within the chip’s input range. With **ADC_11db attenuation**, the ESP32 can measure close to the 3.3 V rail .
+
+### Recommended divider (safe up to 36 V)
+- **R1 = 100 kΩ** (battery + → ADC node)
+- **R2 = 10 kΩ** (ADC node → GND)
+
+Divider ratio:
+\[
+V_{ADC} = V_{BAT} \times \frac{10}{110} = \frac{V_{BAT}}{11}
+\]
+
+So:
+- 30 V → 2.73 V  
+- 36 V → 3.27 V (still safe)
+
+### Add protection & filtering (strongly recommended)
+- **1 kΩ series resistor** between divider node and ADC pin
+- **0.1 µF capacitor** from ADC pin to GND (noise filter)
+
+### Wiring (voltage sense)
+```
+Battery+ ── 100k ──┬── 1k ── ESP32 ADC (VBAT)
+                   │
+                  0.1µF
+                   │
+Battery− ── 10k ───┴──────── ESP32 GND
+```
+
+---
+
+## 3) Measuring battery current with YMKH16
+
+Your YMKH16 version is **0–10 A → 0–2 V analog output**, powered from **5 V** (common for this model) .
+
+### Wiring
+- **YMKH16 VCC** → OKI **5 V**
+- **YMKH16 GND** → **GND**
+- **YMKH16 OUT (0–2 V)** → **ESP32 ADC pin**
+
+The 0–2 V output is **well within ESP32 ADC limits**, so **no divider is needed**.
+
+---
+
+## 4) ESP32‑S3 Arduino example (Voltage + Current)
+
+Use **ADC1 pins** (more stable). Example GPIOs shown — adjust to your board layout.
+
+```cpp
+// ESP32-S3: Battery Voltage + Current (YMKH16)
+
+const int PIN_VBAT = 4;   // ADC1 pin
+const int PIN_I    = 6;   // ADC1 pin
+
+// Voltage divider: 100k / 10k
+const float DIVIDER_RATIO = 11.0;
+
+// YMKH16: 0–10A -> 0–2.0V
+const float I_FS_A = 10.0;
+const float I_FS_V = 2.0;
+
+const int ADC_BITS = 12;
+const int ADC_MAX  = (1 << ADC_BITS) - 1;
+const float ADC_VREF = 3.3;   // practical value; calibrate for best accuracy
+
+float readAdcV(int pin) {
+  uint32_t sum = 0;
+  for (int i = 0; i < 32; i++) sum += analogRead(pin);
+  float raw = sum / 32.0;
+  return (raw / ADC_MAX) * ADC_VREF;
+}
+
+void setup() {
+  Serial.begin(115200);
+  analogReadResolution(ADC_BITS);
+  analogSetAttenuation(ADC_11db);
+}
+
+void loop() {
+  float v_adc  = readAdcV(PIN_VBAT);
+  float v_bat  = v_adc * DIVIDER_RATIO;
+
+  float v_i    = readAdcV(PIN_I);
+  float i_amp  = (v_i / I_FS_V) * I_FS_A;
+
+  float p_watt = v_bat * i_amp;
+
+  Serial.printf("VBAT: %.2f V | I: %.3f A | P: %.1f W\n",
+                v_bat, i_amp, p_watt);
+
+  delay(500);
+}
+```
+
+---
+
+## 5) Accuracy notes (worth doing)
+- ESP32 ADCs vary; for best results, **calibrate** using a known voltage.
+- Measure the **actual resistor values** (100 k / 10 k) and update the ratio.
+- If your current readings are noisy, add a **small RC filter** (e.g., 1 k + 0.1 µF) on the YMKH16 output too.
+
+---
+
+If you want, I can:
+- Map **exact ADC pins** from your Touch LCD 2 schematic
+- Add **battery percentage estimation**
+- Add **over‑voltage / over‑current alarms**
+- Tune the ADC calibration specifically for ESP32‑S3
+
+Just say how far you want to take it.
+
+
+
