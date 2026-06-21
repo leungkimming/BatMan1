@@ -1,4 +1,3 @@
-ui_Home.c
 ui_BatMan.c
 ui_ResetDaily.c
 ui_BatteryMax.c

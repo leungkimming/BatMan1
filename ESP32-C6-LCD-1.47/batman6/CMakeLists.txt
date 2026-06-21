@@ -1,5 +1,4 @@
-SET(SOURCES ui_Home.c
-    ui_BatMan.c
+SET(SOURCES ui_BatMan.c
     ui_ResetDaily.c
     ui_BatteryMax.c
     ui.c

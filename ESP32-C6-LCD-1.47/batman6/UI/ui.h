@@ -27,7 +27,6 @@ extern "C" {
 
 ///////////////////// SCREENS ////////////////////
 
-#include "ui_Home.h"
 #include "ui_BatMan.h"
 #include "ui_ResetDaily.h"
 #include "ui_BatteryMax.h"
