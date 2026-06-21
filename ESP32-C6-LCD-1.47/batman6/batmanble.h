@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 void bleSetup();
-void bleLoop();
+bool bleLoop();
 void blePersistState();
 void bleSetWhRemainingWh(uint16_t wh);
 uint8_t bleGetIdleCount();

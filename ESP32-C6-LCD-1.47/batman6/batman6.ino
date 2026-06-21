@@ -83,8 +83,12 @@ static void updateButtonState() {
 static void updateScreenState() {
   if (screen=="BatMan") {
     refButton = nullptr;
-    rgbLedWrite(RGB_BUILTIN, RGB_BRIGHTNESS, 0, 0);  // Green
-
+    //rgbLedWrite(RGB_BUILTIN, RGB_BRIGHTNESS, 0, 0);  // Green
+    if (buttonLongPressed) {
+      buttonPressed = false;
+      buttonLongPressed = false;
+      requestSleep();
+    }
     if (buttonPressed) {
       buttonPressed = false;
       buttonLongPressed = false;
@@ -95,11 +99,12 @@ static void updateScreenState() {
 
   if (screen=="ResetDaily") {
     refButton = ui_ResetDailyBT;
-    rgbLedWrite(RGB_BUILTIN, 0, 0, RGB_BRIGHTNESS);  // Blue
+    //rgbLedWrite(RGB_BUILTIN, 0, 0, RGB_BRIGHTNESS);  // Blue
     if (buttonLongPressed) {
       buttonPressed = false;
       buttonLongPressed = false;
       int32_mWH00Day = int32_mWH00Now; //set current remaining power as start of day reading
+      preferences.putUInt("mWH00Day", int32_mWH00Day);
       lv_label_set_text(ui_ResetDailyResultLB, "Reset Done");
       Timer_Loop();
     }
@@ -113,11 +118,14 @@ static void updateScreenState() {
 
   if (screen=="BatteryMax") {
     refButton = ui_BatteryMaxBT;
-    rgbLedWrite(RGB_BUILTIN, 0, RGB_BRIGHTNESS, 0);  // red
+    //rgbLedWrite(RGB_BUILTIN, 0, RGB_BRIGHTNESS, 0);  // red
     if (buttonLongPressed) {
       buttonPressed = false;
       buttonLongPressed = false;
-      onBatteryMaxRequested();
+      bleSetWhRemainingWh(400);
+      blePersistState();
+      lv_label_set_text(ui_BatteryMaxResultLB, "Set to Max");
+      Timer_Loop();
     }
     if (buttonPressed) {
       buttonPressed = false;
@@ -130,15 +138,9 @@ static void updateScreenState() {
 
 static void requestSleep() {
   blePersistState();
+  preferences.putUInt("mWH00Day", int32_mWH00Day);
   esp_sleep_enable_ext1_wakeup(WAKEUP_PIN, (esp_sleep_ext1_wakeup_mode_t)0); //1 = High, 0 = Low
   esp_deep_sleep_start();
-}
-
-static void onBatteryMaxRequested() {
-  bleSetWhRemainingWh(400);
-  blePersistState();
-  lv_label_set_text(ui_BatteryMaxResultLB, "Set to Max");
-  Timer_Loop();
 }
 
 void setup()
@@ -162,7 +164,7 @@ void setup()
   Serial.println(int32_mWH00Day);
 
   Serial.println("Starting application...");
-  rgbLedWrite(RGB_BUILTIN, RGB_BRIGHTNESS, 0, 0);
+  rgbLedWrite(RGB_BUILTIN, 0, 0, 0); //blackout save energy
   bleSetup();
 }
 
@@ -170,14 +172,14 @@ void loop()
 {
   updateButtonState();
   updateScreenState();
-  bleLoop();
+  if (bleLoop()) { // true means new data arrive every 5 seconds
+    printData();
+  }
 
   if (bleGetIdleCount() >= IDLE_SLEEP_INTERVALS) {
     Serial.println("No current Sleep");
     requestSleep();
   }
-
-  printData();
 
   Timer_Loop();
   delay(10);

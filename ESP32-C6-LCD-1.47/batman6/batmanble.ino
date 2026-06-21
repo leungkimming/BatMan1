@@ -174,11 +174,11 @@ void printserial(String name, String unit, float value, int places) {
   Serial.println(unit);
 }
 
-void bleLoop() {
+bool bleLoop() {
   unsigned long now = millis();
 
   if (now - lastBlePublishMs < BLE_PUBLISH_INTERVAL_MS) {
-    return;
+    return false;
   }
 
   lastBlePublishMs = now;
@@ -214,6 +214,8 @@ void bleLoop() {
   } else {
     inActive_Sec_count = 0; // has current, activated
   }
+
+  return true;
 }
 
 void blePersistState() {
