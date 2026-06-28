@@ -17,8 +17,8 @@
 
 #define RGB_BUILDIN 8
 #define RGB_BRIGHTNESS 64
-#define BTN_BUILDIN 9
-#define WAKEUP_PIN GPIO_NUM_0
+//#define BTN_BUILDIN GPIO_NUM_4 //9 not use. replaced by SELECT_WAKEUP
+#define SELECT_WAKEUP GPIO_NUM_0
 #define IDLE_SLEEP_INTERVALS 60 //60 x 5 = 5 minute no current; shut down ESP32 to save power
 int state=0;
 bool pressed=false;
@@ -26,6 +26,7 @@ String screen="BatMan";
 bool start=false;
 uint32_t int32_mWH00Day = 0;
 uint32_t int32_mWH00Now = 0;
+float zerobase_V = 0;
 Preferences preferences;
 
 static unsigned long pressStartTime = 0;
@@ -38,6 +39,7 @@ static void printData() {
   int16_t received_mA = bleGetCurrentMa();
   int32_t received_mW00 = bleGetPowerMw();
   uint32_t received_mWH00 = bleGetWhRemaining();
+  zerobase_V = bleReadZeroBase_V();
   int32_mWH00Now = received_mWH00;
 
   float voltage_V = received_mV / 1000.0;
@@ -53,10 +55,11 @@ static void printData() {
   lv_label_set_text(ui_DailyValue, String(Daily_WH,3).c_str());
   Timer_Loop();
   lv_arc_set_value(ui_WHRemainingARC, remaining_WH);
+  lv_label_set_text(ui_SetZeroBaseResultLB, String(zerobase_V, 3).c_str());
 }
 
 static void updateButtonState() {
-  if (digitalRead(BTN_BUILDIN) == 0) { // Button pressed
+  if (digitalRead(SELECT_WAKEUP) == HIGH) { // Button pressed
     if (!buttonPressed && pressStartTime == 0) { // Set pressStartTime only once
       pressStartTime = millis();
       if (refButton != nullptr) { 
@@ -130,6 +133,24 @@ static void updateScreenState() {
     if (buttonPressed) {
       buttonPressed = false;
       lv_label_set_text(ui_BatteryMaxResultLB, "");
+      screen="SetZeroBase";
+      lv_disp_load_scr(ui_Set_Zero_Base);
+    }
+  }
+
+  if (screen=="SetZeroBase") {
+    refButton = ui_SetZeroBaseBT;
+    if (buttonLongPressed) {
+      buttonPressed = false;
+      buttonLongPressed = false;
+      bleSetZeroBase_V(zerobase_V);
+      String zeroBaseText = "Set to " + String(zerobase_V, 3);
+      lv_label_set_text(ui_SetZeroBaseResultLB, zeroBaseText.c_str());
+      Timer_Loop();
+    }
+    if (buttonPressed) {
+      buttonPressed = false;
+      lv_label_set_text(ui_SetZeroBaseResultLB, "");
       screen="BatMan";
       lv_disp_load_scr(ui_BatMan);
     }
@@ -139,7 +160,10 @@ static void updateScreenState() {
 static void requestSleep() {
   blePersistState();
   preferences.putUInt("mWH00Day", int32_mWH00Day);
-  esp_sleep_enable_ext1_wakeup(WAKEUP_PIN, (esp_sleep_ext1_wakeup_mode_t)0); //1 = High, 0 = Low
+  pinMode(SELECT_WAKEUP, INPUT_PULLUP);
+  //uint64_t pin_mask = (1ULL << BTN_BUILDIN)|(1ULL << SELECT_WAKEUP);
+  uint64_t pin_mask = (1ULL << SELECT_WAKEUP);
+  esp_sleep_enable_ext1_wakeup(pin_mask, ESP_EXT1_WAKEUP_ANY_HIGH);
   esp_deep_sleep_start();
 }
 
@@ -149,7 +173,8 @@ void setup()
   delay(2000);
   Serial.println("Starting ...");
 
-  pinMode(BTN_BUILDIN, INPUT_PULLUP);
+  //pinMode(BTN_BUILDIN, INPUT_PULLDOWN); not used. replaced by SELECT_WAKEUP
+  pinMode(SELECT_WAKEUP, INPUT_PULLUP);
   LCD_Init();
   Lvgl_Init();
   ui_init();

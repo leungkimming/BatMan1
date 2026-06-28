@@ -30,6 +30,7 @@ extern "C" {
 #include "ui_BatMan.h"
 #include "ui_ResetDaily.h"
 #include "ui_BatteryMax.h"
+#include "ui_Set_Zero_Base.h"
 
 ///////////////////// VARIABLES ////////////////////
 

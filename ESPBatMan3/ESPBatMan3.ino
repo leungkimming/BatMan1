@@ -46,8 +46,8 @@ Preferences preferences;
 
 class WHCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
-      std::string rxValue = pCharacteristic->getValue();
-
+      //std::string rxValue = pCharacteristic->getValue();
+      String rxValue = pCharacteristic->getValue();
       if (rxValue.length() > 0) {
         Serial.print("Received Value: ");
         uint16_t temp = (int) rxValue[1] << 8;

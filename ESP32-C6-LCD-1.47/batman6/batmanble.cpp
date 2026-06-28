@@ -9,9 +9,11 @@
 // YMKH16D continuous current measurement with calibrated constants
 constexpr int HALL_PIN = GPIO_NUM_2; // Yellow wire (Vout)
 constexpr int VBAT_PIN = GPIO_NUM_1; // Battery voltage divider pin
-constexpr float VZERO_V = 2.055300f;  // New baseline from flipped tests
-constexpr float G_V_PER_A = 0.1905f;  // Slope from regression from calibration
-constexpr uint16_t AVERAGE_SAMPLES = 128;
+constexpr float DEFAULT_VZERO_V = 2.470f; //2.055300f;  // New baseline from flipped tests
+float zeroBase_V = DEFAULT_VZERO_V;
+constexpr float BusVAdj = 0.690f; //adjust bus voltage
+constexpr float G_V_PER_A = 0.1905f;  // Slope from regression from calibration .53/.544 1.05/1.069; 2.15/2.186; 
+constexpr uint16_t AVERAGE_SAMPLES = 32; //128;
 constexpr float DIVIDER_RATIO = 11.0f; //30v with 100k and 10k divider
 
 #define DEVICE_ID      "ESPBatMon5" // Hall effect YMKH16 10A 2V
@@ -30,6 +32,7 @@ uint8_t inActive_Sec_count = 0;
 uint32_t int32_mWH00 = 0;
 uint16_t int16_mV = 0;
 int16_t int16_mA = 0;
+float YMKH16D_V = 0;
 int32_t int32_mW00 = 0; //mW * 100 2 decimal place
 int32_t tempint32 = 0;
 
@@ -42,7 +45,7 @@ float readVoltageAverageV(int pin, uint16_t samples) {
   uint32_t sumMv = 0;
   for (uint16_t i = 0; i < samples; i++) {
     sumMv += static_cast<uint32_t>(analogReadMilliVolts(pin));
-    delay(2);
+    //delay(2);
   }
   return (sumMv / static_cast<float>(samples)) / 1000.0f;
 }
@@ -54,16 +57,10 @@ public:
     analogSetAttenuation(ADC_11db);
   }
 
-  // Returns battery voltage in Volts
-  float getBusVoltage_V() {
-    float vBatPin = readVoltageAverageV(VBAT_PIN, AVERAGE_SAMPLES);
-    return vBatPin * DIVIDER_RATIO;
-  }
-
   // Returns current in milliamps (positive = discharge, negative = charge)
   float getCurrent_mA() {
-    float vOut = readVoltageAverageV(HALL_PIN, AVERAGE_SAMPLES);
-    float deltaV = VZERO_V - vOut; // Reversed math for flipped wire
+    YMKH16D_V = readVoltageAverageV(HALL_PIN, AVERAGE_SAMPLES); 
+    float deltaV = zeroBase_V - YMKH16D_V; // Reversed math for flipped wire
     float i_A = deltaV / G_V_PER_A;
     float i_mA = i_A * 1000.0f;
 
@@ -73,16 +70,21 @@ public:
     }
     return i_mA;
   }
-
-  // Returns power in Watts (positive = discharging, negative = charging)
-  float getBusPower() {
-    float v = getBusVoltage_V();
-    float i_A = getCurrent_mA() / 1000.0f;
-    return v * i_A;
-  }
 };
-
 YMKH16D_Sensor ymkh16d;
+
+// Returns battery voltage in Volts
+float getBusVoltage_V() {
+  float vBatPin = readVoltageAverageV(VBAT_PIN, AVERAGE_SAMPLES);
+  return (vBatPin * DIVIDER_RATIO) + BusVAdj;
+}
+
+// Returns power in Watts (positive = discharging, negative = charging)
+float getBusPower() {
+  float v = getBusVoltage_V();
+  float i_A = ymkh16d.getCurrent_mA() / 1000.0f;
+  return v * i_A;
+}
 
 class WHCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
@@ -124,8 +126,17 @@ void bleSetup() {
   
   preferences.begin("batman v3", false);
   int32_mWH00 = preferences.getUInt("mWH00", 0);
+  uint32_t zeroBase_mV = preferences.getUInt("zerobae_mv", 999999);
+  if (zeroBase_mV == 999999) {
+    const uint32_t zeroBaseDefault_mV = static_cast<uint32_t>(DEFAULT_VZERO_V * 1000);
+    zeroBase_mV = zeroBaseDefault_mV;
+    preferences.putUInt("zerobae_mv", zeroBase_mV);
+  }
+  zeroBase_V = zeroBase_mV / 1000.0f;
   Serial.print("Meter: ");
   Serial.println(int32_mWH00);
+  Serial.print("Zero base: ");
+  Serial.println(zeroBase_V, 3);
  
   memset(tempData, 0, sizeof(tempData));
 
@@ -183,7 +194,7 @@ bool bleLoop() {
 
   lastBlePublishMs = now;
 
-  int16_mV = ymkh16d.getBusVoltage_V() * 1000.00;
+  int16_mV = getBusVoltage_V() * 1000.00;
   int16_mA = ymkh16d.getCurrent_mA() * -1;
   int32_mW00 = (static_cast<int64_t>(int16_mV) * static_cast<int64_t>(int16_mA)) / 10;
   
@@ -200,7 +211,7 @@ bool bleLoop() {
     pA->setValue(tempData, 12);
     pA->notify();
   }
-  
+  printserial("YMKH16D_V", "V", YMKH16D_V, 3);
   printserial("Voltage", "V", int16_mV / 1000.00, 3);
   printserial("Current", "A", int16_mA / 1000.0000, 3);
   printserial("Watts", "W", int32_mW00 / 100000.0000, 5);
@@ -224,6 +235,16 @@ void blePersistState() {
 
 void bleSetWhRemainingWh(uint16_t wh) {
   int32_mWH00 = static_cast<uint32_t>(wh) * 1000 * 100;
+}
+
+float bleReadZeroBase_V() {
+  return YMKH16D_V;
+}
+
+void bleSetZeroBase_V(float newZeroBase_V) {
+  zeroBase_V = newZeroBase_V;
+  uint32_t zeroBase_mV = static_cast<uint32_t>(newZeroBase_V * 1000.0f);
+  preferences.putUInt("zerobae_mv", zeroBase_mV);
 }
 
 uint8_t bleGetIdleCount() {
