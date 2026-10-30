@@ -1,0 +1,448 @@
+Panasonic 24V（滿電 29.4V）的三元鋰電池組，結構為 **7 串（7S）**。
+
+* **單體上限**：$29.4\text{V} \div 7 = 4.20\text{V}$
+* **單體建議放電截止**：$3.00\text{V}$（電池組約 $21.0\text{V}$）
+
+以開路電壓法（OCV, Open Circuit Voltage）估算 SOC 時，由於三元鋰電池（NMC / NCA）的電壓與電量曲線在中間段（30%–80%）較為平緩，且存在內部阻抗與壓降，估算時需區分 **「靜置開路電壓」** 與 **「帶載動態電壓」**。
+
+---
+
+### 一、 靜置狀態（OCV）電壓與 SOC 對照表
+
+> **前提**：電池需**靜置 15–30 分鐘以上**（無充放電電流），此時測得的電壓最接近真實 SOC。
+
+| SOC 剩餘電量 | 總電壓 (7S) | 單體平均電壓 | 狀態說明 |
+| --- | --- | --- | --- |
+| **100%** | **29.40V** | 4.20V | 滿電（剛充完靜置後可能稍降至 29.1V~29.2V） |
+| **90%** | **28.70V** | 4.10V | 電壓下降較快區間 |
+| **80%** | **28.00V** | 4.00V | 進入主要放電平台 |
+| **70%** | **27.30V** | 3.90V | 平緩放電區（電壓每降 0.1V 約扣 7~8% 電量） |
+| **60%** | **26.60V** | 3.80V | 平台期 |
+| **50%** | **25.90V** | 3.70V | 標稱電壓附近（中點） |
+| **40%** | **25.20V** | 3.60V | 平台期 |
+| **30%** | **24.50V** | 3.50V | 平台期末端 |
+| **20%** | **23.80V** | 3.40V | 進入陡降區，建議開始充電 |
+| **10%** | **22.40V** | 3.20V | 電量臨界點，壓降加速 |
+| **0%** | **21.00V** | 3.00V | 放電截止（BMS 保護通常切在 21V~21.7V） |
+
+---
+
+### 二、 單晶片 / 程式擬合公式（分段線性插值）
+
+若要寫入 MCU（如 ESP32）進行開路電壓 SOC 估計，直接使用單一線性公式誤差較大。建議採用 **三段線性插值（Piecewise Linear Interpolation）**：
+
+```cpp
+// 傳入靜置總電壓 (V)，傳回 SOC (%)
+float estimateSOC(float voltage) {
+    if (voltage >= 29.4) return 100.0;
+    if (voltage <= 21.0) return 0.0;
+
+    // 高電壓區 (80% - 100%): 28.0V ~ 29.4V
+    if (voltage > 28.0) {
+        return 80.0 + (voltage - 28.0) * (20.0 / 1.4);
+    }
+    // 中間平緩平台區 (20% - 80%): 23.8V ~ 28.0V
+    else if (voltage > 23.8) {
+        return 20.0 + (voltage - 23.8) * (60.0 / 4.2);
+    }
+    // 低電壓陡降區 (0% - 20%): 21.0V ~ 23.8V
+    else {
+        return 0.0 + (voltage - 21.0) * (20.0 / 2.8);
+    }
+}
+
+```
+
+---
+
+### 三、 實務估算的修正因子與注意事項
+
+1. **負載壓降（Internal Resistance / IR Drop）**：
+* 當電池在**工作中（有負載電流 $I$）** 時，讀到的端電壓為 $V_\text{load} = V_\text{ocv} - (I \times R_\text{internal})$。
+* **修正方法**：若有電流感測器（如 INA226），可先量測電池內阻 $R$。程式採集到電壓 $V$ 與電流 $I$ 後，先反推開路電壓 $V_\text{ocv} = V + (I \times R)$，再用 $V_\text{ocv}$ 去查表估算 SOC。
+
+
+2. **電壓回升現象（Coupling Effect）**：
+* 大電流放電剛停止時，電壓會迅速回升 0.3V~0.8V。必須等待電化學反應平衡（約 5~15 分鐘）後的電壓，用開路估算才精確。
+
+
+3. **溫度影響**：
+* 低溫環境（如 10°C 以下）會使鋰電池內阻顯著上升，負載下壓降增大，且放電平台會整體下移（約降低 0.1V~0.3V），會導致電壓法偏低估算。
+
+
+4. **精準度建議**：
+* 單純用電壓估算 SOC，誤差約在 **±10% ~ ±15%** 之間（特別是在 40%–70% 的中間平台區，電壓變化極小）。
+* 若需要高精度的 SOC（如精度 ±2% 內），建議結合 **庫倫計（安時積分法，Coulomb Counting）**：平時用電流對時間積分計算電量，並在「滿電 29.4V」與「靜置長時間」時利用電壓進行自動校準（Rest/Full Calibration）。
+
+----------------------------
+**完全可行，而且這是一個非常聰明且實用的工程折衷方案！**
+
+如果主放電迴路（大電流、粗線束、防水或整合封裝）很難割開或加裝分流器（Shunt），將感測器（如 INA226）移到**充電迴路**上，利用「充電時的庫倫計 + 充飽歸零機制」，可以完美避開放電迴路的改裝難題。
+
+以下是這個方案的運作邏輯、強大優勢以及需要注意的物理特性：
+
+---
+
+### 一、 運作邏輯（充電式庫倫計 + OCV 校準）
+
+1. **起點校準（Initial SOC）：**
+* 充電開始前，讀取電池的**靜置電壓**（如果剛放電完，需靜置一段時間或透過帶載電壓反推），利用前述的 OCV 表格估算出充電前的起始電量，例如 $SOC_{\text{start}} = 30\%$。
+
+
+2. **過程累積（Charging Wh / Ah）：**
+* 當充電器接入開始充電時，INA226 開始對充電電流進行積分，記錄這次充電總共補進了多少能量（$Wh_{\text{in}}$）或電量（$Ah_{\text{in}}$）。
+
+
+3. **終點重置（100% Full Reset）：**
+* 當充電完成（電壓達到 **29.4V** 且充電電流遞減至截止電流），系統強制將 SOC 設為 **100%**。這一步非常關鍵，它能**徹底消除庫倫計長期累積的零點飄移與誤差**。
+
+
+
+---
+
+### 二、 這套方案帶來的兩大額外好處
+
+#### 1. 自動計算電池真實健康度（SOH, State of Health）
+
+因為你記錄了「充電前的起始 SOC」以及「充電補入的總 Wh」，你可以動態算出電池目前的**實際總容量**，而不只是依據原廠標稱值：
+
+
+$$\text{實際總容量 } (Wh_{\text{total}}) = \frac{Wh_{\text{in}}}{1 - (SOC_{\text{start}} / 100)}$$
+
+* *例如*：充電前 OCV 估算 SOC 為 30%（代表還剩 70% 的空間要補），充電過程總共充進了 $140\text{ Wh}$。
+* 則實際總容量為：$140 \div 0.7 = 200\text{ Wh}$。
+* 這能讓你在每次充滿電時，順便檢視電池老化的程度。
+
+#### 2. 不需要承受大電流分流器的發熱與壓降
+
+放電時電流通常很大（電動載具或高功率設備可能達數十安培），分流器（Shunt Resistor）容易發熱且影響效率。而**充電電流通常較小且穩定**（例如 2A~5A 專用充電器），將 INA226 放在充電線上，硬體安全度和準確度都會更好。
+
+---
+
+### 三、 實務上的微調與注意事項
+
+如果你在充電時用 Wh（電能）來計算，放電時要推算剩餘可用時間，需要注意以下兩點物理特性：
+
+1. **能量效率（Wh Efficiency, 約 90% ~ 93%）：**
+* 鋰電池的庫倫效率（Ah 效率）高達 99%，但**能量效率（Wh 效率）小於 100%**。因為充電時的平均電壓（約 26V~29V）高於放電時的平均電壓（約 22V~25V），充進去的 $Wh_{\text{in}}$ 會有一部分轉化為熱能消耗掉。
+* **修正建議**：若想用充電的 $Wh$ 去預估放電能用多久，計算可用放電能量時，必須乘以一個效率係數（建議保守估計 $\eta \approx 0.90 \sim 0.92$）：
+
+$$\text{可放電能 } (Wh_{\text{discharge}}) \approx Wh_{\text{in}} \times 0.92$$
+
+
+
+
+2. **放電時的 SOC 顯示：**
+* 因為放電時沒有做即時庫倫計，放電中途的 SOC 可以怎麼顯示？
+* **作法 A**：在放電過程中，改用前面提到的 **「動態電壓查表法」** 或是簡單的時間粗估來顯示剩餘電量。
+* **作法 B**：放電時只顯示「上次充滿後已經使用了多少 Wh」（從充電記錄的總量扣除，配合效率折算），當電壓降到接近截止點（如 21.5V~22V）時強制歸零警報。
+
+
+
+
+
+這種「充電累積 + 滿電歸零」的架構在許多無法輕易改裝放電主線的嵌式系統中非常經典且實用，完全可行！
+
+-------------------
+**完全可以，而且這是一種非常優秀的「反向修正（Back-calculation）」演算法！**
+
+在實務中，單純依賴充電前的靜置電壓（OCV）查表，誤差往往最大（因為 30% 到 80% 之間的電壓曲線非常平緩，電壓差 0.1V 誤差就可能達 10%）。
+
+如果你的電池規格是確定的（**24V / 60Ah**，額定能量約為 $24\text{V} \times 60\text{Ah} = 1440\text{Wh}$，7S 滿電狀態下總能量約 $1500\sim1550\text{Wh}$），你可以利用每次「充到 100% 滿電」的已知結果，反推當初開始充電時的 **真實起始 SOC ($SOC_{\text{true}}$)**。
+
+---
+
+### 一、 反向修正的數學原理
+
+充電過程結束時（電壓達 29.4V 且電流降至截止點），系統獲得了一個**絕對精準的基準點：$SOC = 100\%$**。
+
+此時利用 INA226 記錄到的實際充電量 $Ah_{\text{in}}$（或 $Wh_{\text{in}}$）：
+
+#### 1. 以 Ah（庫倫/電量）計算（最精準、不受電壓變化影響）
+
+標稱容量 $C_{\text{nominal}} = 60\text{ Ah}$。
+
+
+$$\text{真實補充的 SOC 百分比 } (\Delta SOC) = \frac{Ah_{\text{in}}}{60\text{ Ah}} \times 100\%$$
+
+$$\text{修正後的真實起始 SOC } (SOC_{\text{start, true}}) = 100\% - \Delta SOC$$
+
+> **範例**：
+> 充電前 OCV 預估 SOC 為 30%。
+> 充電結束，INA226 記錄到充入 $Ah_{\text{in}} = 45\text{ Ah}$。
+> * $\Delta SOC = (45 / 60) \times 100\% = 75\%$
+> * **修正後的真實起始 SOC** $= 100\% - 75\% = \mathbf{25\%}$
+> 
+> 
+> *這說明當初用電壓預估的 30% 偏高了 5%，實際剩餘電量只有 25%。*
+
+#### 2. 以 Wh（能量）計算（需考慮充放電效率 $\eta$）
+
+7S 三元鋰電池的平均放電電壓約 $3.6\text{V} \times 7 = 25.2\text{V}$，總能量約 $60\text{Ah} \times 25.2\text{V} \approx 1512\text{ Wh}$。
+若用 $Wh$ 計算，因充電過程有熱損耗，充電能量效率約為 $\eta \approx 92\%$：
+
+
+$$SOC_{\text{start, true}} = 100\% - \left( \frac{Wh_{\text{in}} \times \eta}{E_{\text{total}}} \times 100\% \right)$$
+
+---
+
+### 二、 修正演算法（Self-Correction）的價值
+
+這個反向修正機制可以在 MCU（ESP32）程式中實現**自我學習與校準**：
+
+1. **修正 OCV 電壓對照表**：
+你可以把「每次記錄到的起始靜置電壓 $V_{\text{start}}$」與「反推出來的 $SOC_{\text{start, true}}$」記錄在 ESP32 的 Flash / NVS 中。幾次充電後，你就能建立一張**專屬於你這組老舊/實際電池的精準 OCV 曲線表**。
+2. **動態更新電池衰減（SOH 校準）**：
+如果有一天，電池從接近完全沒電（如 OCV 顯示 21.5V，理論上 $SOC \approx 2\%$）開始充，充到滿電時 INA226 只測得 $48\text{ Ah}$：
+* 代表電池已經老化，**當前最大可用容量已從 60Ah 衰減至 48Ah**（健康度 $\text{SOH} = 48/60 = 80\%$）。
+* 隨後程式將容量參數自動調整為 $C_{\text{current}} = 48\text{ Ah}$，以後的 SOC 計算就會繼續保持精準，不會出現「顯示還有 20% 電量卻突然斷電」的情況。
+
+
+
+---
+
+### 三、 程式實現邏輯（ESP32 虛擬碼）
+
+```cpp
+float nominalCapAh = 60.0; // 標稱 60Ah
+float currentCapAh = 60.0; // 動態校準後的容量
+
+void onChargeFinished(float totalAhCharged, float initialVoltage) {
+    // 1. 強制滿電重置
+    currentSOC = 100.0;
+
+    // 2. 反推起始真實 SOC
+    float chargedSOC = (totalAhCharged / currentCapAh) * 100.0;
+    float trueStartSOC = 100.0 - chargedSOC;
+
+    // 3. 判斷是否需要校準容量 (例如：若 OCV 顯示當初已極低 < 5%，但充入 Ah 遠低於預期)
+    if (initialVoltage <= 22.0 && chargedSOC < 90.0) {
+        // 電池有顯著老化，更新實際容量
+        currentCapAh = totalAhCharged / 0.95; // 假設 22V 約剩 5%
+    }
+
+    // 4. 輸出 log 供分析：比較 OCV 預估值與實際庫倫計算值
+    Serial.printf("Charge complete. Ah Charged: %.2f Ah\n", totalAhCharged);
+    Serial.printf("Calculated True Start SOC: %.1f%%\n", trueStartSOC);
+}
+
+```
+
+### 總結
+
+以 **Ah（安時積分）** 進行充電測量，並在滿電時**反推修正 OCV 估算**，是最符合電池物理特性的做法。這樣既避開了改裝主放電迴路的麻煩，又解決了電壓法不準確的痛點！
+
+----------------
+**完全命中核心！這正是高階電池管理系統（BMS）中「動態自適應學習（Adaptive Learning）」的精髓。**
+
+你提出的這個想法非常專業：每次充滿電後的「反向計算」，其實提供了一個極具價值的實測數據對：`(V_start, SOC_true)`。
+
+利用這個數據去**修正、校準或微調 OCV（開路電壓）查表公式或對照表**，可以讓下一次放電或充電前的電壓預估變得越來越準確，完全貼合這顆電池當前的老化狀態。
+
+具體來說，這個修正機制可以這樣在軟體（如 ESP32）中實現：
+
+---
+
+### 一、 修正的具體運作邏輯
+
+1. **收集數據對**：
+* 充電前記錄：靜置電壓 $V_{\text{start}}$（例如 `24.5V`）。
+* 充飽後反算：真實起始電量 $SOC_{\text{true}}$（例如計算出來是 `22.0%`，而舊公式原本算出來是 `30.0%`）。
+
+
+2. **建立/更新對照表（或修正點）**：
+* 你手中原本是一條「硬編碼（Hardcoded）」的標準三元鋰電壓曲線。
+* 經過這次測量，你得到了一個真實錨點：**「原來在這顆電池上，24.5V 時其實只有 22%」**。
+
+
+
+---
+
+### 二、 兩種實務上的程式修正作法
+
+#### 作法 A：整體位移法（Offset / Bias Correction）—— 最簡單穩定
+
+如果電池只是輕微整體老化，其 OCV 曲線的形狀沒變，只是整體向上或向下平移，你可以計算一個**誤差偏置（Offset）**：
+
+
+$$\text{Error} = SOC_{\text{true}} - SOC_{\text{old\_formula}}(V_{\text{start}})$$
+
+
+在接下來的放電過程中，用這個 Error 去修正電壓查出來的 SOC（但要注意做平滑處理，避免數值跳動）。
+
+#### 作法 B：動態錨點微調法（Weighted Moving Average of Table Points）—— 進階精準
+
+如果你程式中是用陣列或分段函數記錄 OCV 曲線，可以引入**學習率（Learning Rate, 比如 $\alpha = 0.2$）**，慢慢把實測結果「融合」進去：
+
+* 假設你記錄了各個電壓對應的 SOC 節點。
+* 當你用 $V_{\text{start}}$ 算出了更準確的 $SOC_{\text{true}}$，你可以讓對應電壓區段的公式參數進行微調：
+
+$$\text{New\_Param} = (1 - \alpha) \times \text{Old\_Param} + \alpha \times \text{Measured\_Param}$$
+
+
+* 透過幾次完整的「放電 $\rightarrow$ 充電 $\rightarrow$ 滿電反算」循環，這張 OCV 表就會變成**這顆特定電池的專屬高精度表**。
+
+---
+
+### 三、 執行修正時必須注意的三個「陷阱」
+
+雖然這個思路完全正確，但在寫程式時要過濾掉「雜訊數據」，否則會把曲線越修越亂：
+
+1. **必須確保 $V_{\text{start}}$ 是真正的「靜置電壓」（OCV）**：
+* 如果電池剛大電流放電完畢，電池內部有極化現象（Polarization），端電壓會被拉低。如果馬上插上充電，此時讀到的 $V_{\text{start}}$ 會偏低。
+* **解法**：程式中可以加一個條件——只有當電池處於「長時間靜置（例如大於 2 小時無電流）」狀態下讀取的 $V_{\text{start}}$，才拿來做為校準 OCV 曲線的依據。若剛放完電就馬上充電，則略過這次的曲線修正，僅用來更新當次 SOC。
+
+
+2. **充電電流必須穩定且完整**：
+* 如果中途斷電又重啟，或是充電器提前跳停（沒充到真正的 29.4V 截止點），$Ah_{\text{in}}$ 的累積就會失真，此時不能執行反向修正。
+
+
+3. **避免過度修正（Learning Rate 不能太大）**：
+* 單單一次充電可能受到溫度、測量誤差的干擾。每次修正只能讓舊參數微幅靠近新數據（例如只採納 20% 的變動量），才不會因為某次突發狀況導致整個演算法崩潰。
+
+
+
+### 總結
+
+你的直覺非常準確。**「滿電反算 $SOC_{\text{true}}$ $\rightarrow$ 比對當時的 $V_{\text{start}}$ $\rightarrow$ 迴饋修正 OCV 估算模型」**，這正是成熟 BMS 演算法（如安時積分結合 OCV 線上修正）的核心靈魂！
+
+------------------
+程式設計亮點說明：表格化動態 Offset（偏置調整）：程式保留了基礎的物理分段點（如 21V, 23.8V, 26.6V...），但每個點多了一個 offset 變數。當某個電壓區段被實測資料糾正時，該區段的偏置會被動態拉抬或下修。學習率（Learning Rate, $\alpha = 0.2$）：引入了權重機制，確保單一次充電可能受溫度或短暫靜置不完全的干擾，不會一下子把整張表改崩潰，而是漸進式學習（Converge gradually）。邊界防護：加入了 constrain() 與範圍檢查，確保修正後的偏置不會讓 SOC 發生小於 0% 或大於 100% 的邏輯錯誤。(提示：若要將校準後的 ocvTable 永久保存，可以將 ocvTable[i].offset 數值寫入 ESP32 的 NVS (Non-Volatile Storage)，這樣斷電重啟後校準成果也不會消失！)
+
+-------------
+
+
+
+
+
+您點出了非常關鍵的架構盲點！如果第一次開機時只設了 `is_init = true` 卻沒有把預設的 `offset` 寫進 NVS，萬一程式在第一次充滿電（觸發 `updateOCVCalibration` 寫入 NVS 之前）就因為斷電或重啟而重新開機，雖然因為 `getFloat` 的 fallback 剛好拿到 `0.0` 沒崩潰，但 NVS 裡面實際上是呈現「未寫入有效數值」的狀態，這在嚴謹的韌體設計中確實隱含風險。
+
+為了確保每次開機、甚至是初次上線時，NVS 內都有完整且明確的初始資料，我們應該在**第一次初始化時，主動把 `ocvTable[i].offset` 的預設值完整寫入 Preferences 中**。
+
+以下是修正後的完整程式碼：
+
+### 確保首次完整寫入預設值的 C++ 程式碼
+
+```cpp
+#include <Arduino.h>
+#include <Preferences.h>  
+
+Preferences preferences;
+
+const float V_FULL = 29.4;   
+const float V_EMPTY = 21.0;  
+const int TABLE_SIZE = 5;    
+
+struct OCVPoint {
+    float voltage;
+    float base_soc;
+    float offset; 
+};
+
+// 基礎 OCV 曲線與預設偏移量
+OCVPoint ocvTable[TABLE_SIZE] = {
+    {21.0,   0.0,  0.0},
+    {23.8,  20.0,  0.0},
+    {26.6,  60.0,  0.0},
+    {28.0,  80.0,  0.0},
+    {29.4, 100.0,  0.0}
+};
+
+// --- 1. 從 Preferences 載入，若首次使用則主動將預設值寫入 NVS ---
+void loadCalibrationFromPrefs() {
+    preferences.begin("bms_storage", false); // 讀寫模式
+    
+    bool isInitialized = preferences.getBool("is_init", false);
+    
+    if (!isInitialized) {
+        Serial.println("[NVS] First time use detected. Saving default offsets to Preferences...");
+        
+        // 主動將記憶體中的預設 offset 寫入 NVS 儲存區
+        for (int i = 0; i < TABLE_SIZE; i++) {
+            String key = "offset_" + String(i);
+            preferences.putFloat(key.c_str(), ocvTable[i].offset);
+        }
+        
+        // 標記已初始化
+        preferences.putBool("is_init", true);
+        Serial.println("[NVS] Default initialization complete.");
+    } else {
+        // 非首次使用：從 NVS 讀取已保存的偏移量
+        for (int i = 0; i < TABLE_SIZE; i++) {
+            String key = "offset_" + String(i);
+            // 此處若抓不到才用 0.0 作為安全防護
+            ocvTable[i].offset = preferences.getFloat(key.c_str(), 0.0);
+        }
+        Serial.println("[NVS] Calibration offsets successfully loaded from Preferences.");
+    }
+    
+    preferences.end();
+}
+
+// --- 2. 將當前 Offset 儲存到 Preferences ---
+void saveCalibrationToPrefs() {
+    preferences.begin("bms_storage", false); 
+    
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        String key = "offset_" + String(i);
+        preferences.putFloat(key.c_str(), ocvTable[i].offset);
+    }
+    
+    preferences.end();
+    Serial.println("[NVS] Calibration offsets saved to Preferences!");
+}
+
+// --- 3. 核心：根據目前電壓與修正表計算 SOC ---
+float estimateSOC(float voltage) {
+    if (voltage >= V_FULL) return 100.0;
+    if (voltage <= V_EMPTY) return 0.0;
+
+    for (int i = 0; i < TABLE_SIZE - 1; i++) {
+        float v1 = ocvTable[i].voltage;
+        float v2 = ocvTable[i+1].voltage;
+
+        if (voltage >= v1 && voltage <= v2) {
+            float soc1 = constrain(ocvTable[i].base_soc + ocvTable[i].offset, 0.0, 100.0);
+            float soc2 = constrain(ocvTable[i+1].base_soc + ocvTable[i+1].offset, 0.0, 100.0);
+
+            float soc = soc1 + (voltage - v1) * (soc2 - soc1) / (v2 - v1);
+            return constrain(soc, 0.0, 100.0);
+        }
+    }
+    return 50.0;
+}
+
+// --- 4. 充滿電時的反向修正函數 + 自動存檔 ---
+void updateOCVCalibration(float v_start, float soc_true) {
+    if (v_start < V_EMPTY || v_start >= V_FULL) return;
+
+    float soc_old = estimateSOC(v_start);
+    float error = soc_true - soc_old;
+    float alpha = 0.2; 
+
+    for (int i = 0; i < TABLE_SIZE - 1; i++) {
+        if (v_start >= ocvTable[i].voltage && v_start <= ocvTable[i+1].voltage) {
+            ocvTable[i].offset   = ocvTable[i].offset   + alpha * error;
+            ocvTable[i+1].offset = ocvTable[i+1].offset + alpha * error;
+            
+            Serial.printf("[OCV Calibration] V_start: %.2fV | Old SOC: %.1f%% | True SOC: %.1f%% | Error: %.1f%%\n", 
+                          v_start, soc_old, soc_true, error);
+            
+            saveCalibrationToPrefs();
+            break;
+        }
+    }
+}
+
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+
+    // 啟動時載入，若為首次開機將自動把預設 offset 寫入 NVS
+    loadCalibrationFromPrefs();
+}
+
+void loop() {
+}
+
+```

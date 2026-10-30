@@ -81,6 +81,7 @@ class ServerCallbacks: public BLEServerCallbacks {
 
 void setup() {
   Serial.begin(115200);
+  delay(1500);
   pinMode(LED_BUILTIN,OUTPUT);
   Serial.println("Setup");
   blink(1);

@@ -1,0 +1,120 @@
+#include <Arduino.h>
+#include <Preferences.h>  
+
+Preferences preferences;
+
+const float V_FULL = 29.4;   
+const float V_EMPTY = 21.0;  
+const int TABLE_SIZE = 5;    
+
+struct OCVPoint {
+    float voltage;
+    float base_soc;
+    float offset; 
+};
+
+// 基礎 OCV 曲線與預設偏移量
+OCVPoint ocvTable[TABLE_SIZE] = {
+    {21.0,   0.0,  0.0},
+    {23.8,  20.0,  0.0},
+    {26.6,  60.0,  0.0},
+    {28.0,  80.0,  0.0},
+    {29.4, 100.0,  0.0}
+};
+
+// --- 1. 從 Preferences 載入，若首次使用則主動將預設值寫入 NVS ---
+void loadCalibrationFromPrefs() {
+    preferences.begin("bms_storage", false); // 讀寫模式
+    
+    bool isInitialized = preferences.getBool("is_init", false);
+    
+    if (!isInitialized) {
+        Serial.println("[NVS] First time use detected. Saving default offsets to Preferences...");
+        
+        // 主動將記憶體中的預設 offset 寫入 NVS 儲存區
+        for (int i = 0; i < TABLE_SIZE; i++) {
+            String key = "offset_" + String(i);
+            preferences.putFloat(key.c_str(), ocvTable[i].offset);
+        }
+        
+        // 標記已初始化
+        preferences.putBool("is_init", true);
+        Serial.println("[NVS] Default initialization complete.");
+    } else {
+        // 非首次使用：從 NVS 讀取已保存的偏移量
+        for (int i = 0; i < TABLE_SIZE; i++) {
+            String key = "offset_" + String(i);
+            // 此處若抓不到才用 0.0 作為安全防護
+            ocvTable[i].offset = preferences.getFloat(key.c_str(), 0.0);
+        }
+        Serial.println("[NVS] Calibration offsets successfully loaded from Preferences.");
+    }
+    
+    preferences.end();
+}
+
+// --- 2. 將當前 Offset 儲存到 Preferences ---
+void saveCalibrationToPrefs() {
+    preferences.begin("bms_storage", false); 
+    
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        String key = "offset_" + String(i);
+        preferences.putFloat(key.c_str(), ocvTable[i].offset);
+    }
+    
+    preferences.end();
+    Serial.println("[NVS] Calibration offsets saved to Preferences!");
+}
+
+// --- 3. 核心：根據目前電壓與修正表計算 SOC ---
+float estimateSOC(float voltage) {
+    if (voltage >= V_FULL) return 100.0;
+    if (voltage <= V_EMPTY) return 0.0;
+
+    for (int i = 0; i < TABLE_SIZE - 1; i++) {
+        float v1 = ocvTable[i].voltage;
+        float v2 = ocvTable[i+1].voltage;
+
+        if (voltage >= v1 && voltage <= v2) {
+            float soc1 = constrain(ocvTable[i].base_soc + ocvTable[i].offset, 0.0, 100.0);
+            float soc2 = constrain(ocvTable[i+1].base_soc + ocvTable[i+1].offset, 0.0, 100.0);
+
+            float soc = soc1 + (voltage - v1) * (soc2 - soc1) / (v2 - v1);
+            return constrain(soc, 0.0, 100.0);
+        }
+    }
+    return 50.0;
+}
+
+// --- 4. 充滿電時的反向修正函數 + 自動存檔 ---
+void updateOCVCalibration(float v_start, float soc_true) {
+    if (v_start < V_EMPTY || v_start >= V_FULL) return;
+
+    float soc_old = estimateSOC(v_start);
+    float error = soc_true - soc_old;
+    float alpha = 0.2; 
+
+    for (int i = 0; i < TABLE_SIZE - 1; i++) {
+        if (v_start >= ocvTable[i].voltage && v_start <= ocvTable[i+1].voltage) {
+            ocvTable[i].offset   = ocvTable[i].offset   + alpha * error;
+            ocvTable[i+1].offset = ocvTable[i+1].offset + alpha * error;
+            
+            Serial.printf("[OCV Calibration] V_start: %.2fV | Old SOC: %.1f%% | True SOC: %.1f%% | Error: %.1f%%\n", 
+                          v_start, soc_old, soc_true, error);
+            
+            saveCalibrationToPrefs();
+            break;
+        }
+    }
+}
+
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+
+    // 啟動時載入，若為首次開機將自動把預設 offset 寫入 NVS
+    loadCalibrationFromPrefs();
+}
+
+void loop() {
+}

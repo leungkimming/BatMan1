@@ -1,0 +1,8 @@
+old: wemos d1 mini esp32
+
+new: esp32s3 dev module usb cdc on boot: enabled; flash size 16M; partition: 16M 3MB app/9.9M fats PSRAM: disabled; usb  mode: hardware cdc.
+
+https://www.aliexpress.com/item/1005013302960054.html?src=google&src=google&albch=shopping&acnt=615-992-9880&isdl=y&slnk=&plac=&mtctp=&albbt=Google_7_shopping&aff_platform=google&aff_short_key=_oFgTQeV&gclsrc=aw.ds&albagn=888888&ds_e_adid=&ds_e_matchtype=&ds_e_device=c&ds_e_network=x&ds_e_product_group_id=&ds_e_product_id=zh1005013302960054&ds_e_product_merchant_id=5311377286&ds_e_product_country=HK&ds_e_product_language=zh&ds_e_product_channel=online&ds_e_product_store_id=&ds_url_v=2&albcp=23862223198&albag=&isSmbAutoCall=false&needSmbHouyi=false&gad_source=1&gad_campaignid=23857743536&gbraid=0AAAAA_TvRHpsHhgfouYpwEYGYooZiSoZK&gclid=EAIaIQobChMIkseJyorGlwMVkN0WBR1xYSEfEAQYAiABEgK8F_D_BwE#nav-specification
+
+cactus whistle speech model 
+https://github.com/andrisgauracs/whistle-esp32

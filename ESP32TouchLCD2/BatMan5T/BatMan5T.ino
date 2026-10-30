@@ -7,6 +7,8 @@
 #include "ui.h"
 #include "BLEDevice.h"
 #include "Preferences.h"
+#include "esp_sleep.h"
+#include "driver/rtc_io.h"
 
 #define IMU_ADDRESS 0x6B    //Change to the address of the IMU
 #define PERFORM_CALIBRATION //Comment to disable startup calibration
@@ -35,12 +37,22 @@ GyroData gyroData;
 #define LCD_V_RES 320
 
 #define BTN_BUILDIN 0
+#define BATTERY_ADC_PIN 5
+#define BATTERY_DIVIDER_RATIO 3.0f
+#define PRINT_DATA_TIMEOUT_MS 30000UL
+#define LCD_IDLE_TIMEOUT_MS 20000UL
+#define LCD_DEEP_SLEEP_TIMEOUT_MS 60000UL
+#define LCD_BACKLIGHT_MAX ((1 << LEDC_TIMER_10_BIT) - 1)
 
 int state=0;
 String screen="Home";
 uint32_t int32_mWH00Day = 0;
 uint32_t int32_mWH00Now = 0;
 Preferences preferences;
+volatile uint32_t lastPrintDataAt = 0;
+uint32_t lastUiActivityAt = 0;
+uint32_t lcdBacklightOffAt = 0;
+bool lcdBacklightOn = true;
 
 static BLEUUID serviceUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
 static BLEUUID announceUUID("aa337802-6aca-42a5-b34d-a8d9fc12a266");
@@ -48,9 +60,19 @@ static BLEUUID updateUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8");
 static boolean doConnect = false;
 static boolean connected = false;
 static boolean allowReScan = false;
+static uint32_t nextScanAt = 0;
 static BLERemoteCharacteristic *pAnnounceCharacteristic;
 static BLERemoteCharacteristic *pUpdateCharacteristic;
 static BLEAdvertisedDevice *myDevice;
+static BLEClient *pClient;
+class MyClientCallback;
+static MyClientCallback *clientCallbacks;
+static bool disposeClient = false;
+enum SleepReason : uint8_t {
+  SleepReasonNone = 0,
+  SleepReasonLcdOff = 1
+};
+RTC_DATA_ATTR SleepReason lastSleepReason = SleepReasonNone;
 
 /* More data bus class: https://github.com/moononournation/Arduino_GFX/wiki/Data-Bus-Class */
 Arduino_DataBus *bus = new Arduino_ESP32SPI(
@@ -78,6 +100,39 @@ lv_color_t *disp_draw_buf;
 lv_disp_drv_t disp_drv;
 bool isPortrait = true; // Assume portrait mode by default
 lv_timer_t *qmi8658_timer = NULL;
+
+static void setLcdBacklight(bool enabled) {
+#ifdef PIN_NUM_LCD_BL
+  ledcWrite(PIN_NUM_LCD_BL, enabled ? LCD_BACKLIGHT_MAX : 0);
+#endif
+  lcdBacklightOn = enabled;
+  lcdBacklightOffAt = enabled ? 0 : millis();
+}
+
+static void registerUiActivity() {
+  lastUiActivityAt = millis();
+  if (!lcdBacklightOn) {
+    setLcdBacklight(true);
+  }
+}
+
+static void turnOffLcdIfIdle() {
+  if (lcdBacklightOn && millis() - lastUiActivityAt >= LCD_IDLE_TIMEOUT_MS) {
+    setLcdBacklight(false);
+    Serial.println("No UI activity for 20 seconds; LCD backlight turned off.");
+  }
+}
+
+static void updateBatteryDisplay() {
+  const uint16_t adcValue = analogRead(BATTERY_ADC_PIN);
+  const float voltage = (adcValue * (3.3f / 4095.0f)) * BATTERY_DIVIDER_RATIO;
+  const int batteryBarValue = static_cast<int>(voltage * 100.0f);
+  lv_label_set_text(ui_Home_bLevel, String(voltage, 2).c_str());
+  lv_label_set_text(ui_HomeLD_bLevel, String(voltage, 2).c_str());
+  lv_bar_set_value(ui_Home_Bat, batteryBarValue, LV_ANIM_OFF);
+  lv_bar_set_value(ui_HomeLD_Bat, batteryBarValue, LV_ANIM_OFF);
+  Serial.println(batteryBarValue);
+}
 
 static void qmi8658_callback(lv_timer_t *timer) {
   IMU.update();
@@ -167,6 +222,7 @@ void my_touchpad_read(lv_indev_drv_t *indev_drv, lv_indev_data_t *data) {
   uint16_t touchpad_y;
   bsp_touch_read();
   if (bsp_touch_get_coordinates(&touchpad_x, &touchpad_y)) {
+    registerUiActivity();
     data->point.x = touchpad_x;
     data->point.y = touchpad_y;
     data->state = LV_INDEV_STATE_PRESSED;
@@ -188,6 +244,7 @@ static void notifyCallback(BLERemoteCharacteristic *pBLEAnnounceCharacteristic, 
 }
 
 static void printData(uint8_t *pData, size_t length) {
+  lastPrintDataAt = millis();
   if (length >= 12) { // Ensure the data length is sufficient
     uint16_t received_mV = pData[0] | (pData[1] << 8);
     int16_t received_mA = pData[2] | (pData[3] << 8);
@@ -205,17 +262,6 @@ static void printData(uint8_t *pData, size_t length) {
     // float Daily_WH = int32_mWH00Day / (1000.0 * 100.0) * 5 / 60 / 60;
     // subtract the current power from the start of day meter to get the daily consumption
     float Daily_WH = (int32_mWH00Day - int32_mWH00Now) / (1000.0 * 100.0);
-
-    // Serial.print("Received Voltage (V): ");
-    // Serial.println(voltage_V, 2);
-    // Serial.print("Received Current (A): ");
-    // Serial.println(current_A, 2);
-    // Serial.print("Received Power (W): ");
-    // Serial.println(power_W, 4);
-    // Serial.print("Received Energy (H): ");
-    // Serial.println(remaining_WH, 4);
-    // Serial.print("Daily Energy (H): ");
-    // Serial.println(Daily_WH, 4);
     lv_label_set_text(ui_BatMan_VoltageValue, String(voltage_V,3).c_str());
     lv_label_set_text(ui_BatMan_CurrentValue, String(current_A,3).c_str());
     lv_label_set_text(ui_BatMan_WattsValue, String(power_W,3).c_str());
@@ -244,20 +290,41 @@ class MyClientCallback : public BLEClientCallbacks {
     lv_scr_load(isPortrait ? ui_Home : ui_HomeLD);
     Serial.println("onDisconnect");
     connected = false;
+    pAnnounceCharacteristic = nullptr;
+    pUpdateCharacteristic = nullptr;
+    disposeClient = true;
+    nextScanAt = millis() + 1500;
   }
 };
 
 bool connectToServer() {
+  if (myDevice == nullptr) {
+    Serial.println("BLE device is not selected");
+    return false;
+  }
+
   Serial.print("Forming a connection to ");
   Serial.println(myDevice->getAddress().toString().c_str());
 
-  BLEClient *pClient = BLEDevice::createClient();
-  Serial.println(" - Created client");
-
-  pClient->setClientCallbacks(new MyClientCallback());
+  if (pClient == nullptr) {
+    pClient = BLEDevice::createClient();
+    if (pClient == nullptr) {
+      Serial.println("BLE client initialization failed");
+      return false;
+    }
+    pClient->setClientCallbacks(clientCallbacks);
+    Serial.println(" - Created client");
+  }
 
   // Connect to the remove BLE Server.
-  pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
+  bool connectedToServer = pClient->connect(myDevice);  // if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)
+  delete myDevice;
+  myDevice = nullptr;
+  if (!connectedToServer) {
+    Serial.println(" - Failed to connect to server");
+    nextScanAt = millis() + 1500;
+    return false;
+  }
   Serial.println(" - Connected to server");
   pClient->setMTU(517);  //set client to request maximum MTU from server (default is 23 otherwise)
 
@@ -337,6 +404,8 @@ class MyAdvertisedDeviceCallbacks : public BLEAdvertisedDeviceCallbacks {
     //if (advertisedDevice.haveServiceUUID() && advertisedDevice.isAdvertisingService(serviceUUID)) {
     if (advertisedDevice.getName().startsWith("ESPBatMon")) {
       BLEDevice::getScan()->stop();
+      BLEDevice::getScan()->clearResults();
+      delete myDevice;
       myDevice = new BLEAdvertisedDevice(advertisedDevice);
       doConnect = true;
       allowReScan = true;
@@ -361,6 +430,7 @@ void ScanResultsCB(BLEScanResults result) {
   lv_label_set_text(ui_Home_StartBTLB, "Scan\nBattery");
   lv_label_set_text(ui_HomeLD_StartBTLB, "Scan\nBattery");
   lv_timer_handler();
+  BLEDevice::getScan()->clearResults();
 }
 
 void StartScanBattery(lv_event_t * e) {
@@ -397,8 +467,25 @@ void my_disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *c
 void setup() {
   pinMode(BTN_BUILDIN, INPUT_PULLUP);
   Serial.begin(115200);
+  const esp_sleep_wakeup_cause_t wakeupCause = esp_sleep_get_wakeup_cause();
+  const bool wokeFromLcdOffSleep =
+    wakeupCause == ESP_SLEEP_WAKEUP_EXT0
+    && lastSleepReason == SleepReasonLcdOff;
+  lastSleepReason = SleepReasonNone;
+  Serial.print("Wakeup cause: ");
+  Serial.println(wakeupCause);
+
+  // force using PSRAM for BLE/wifi Malloc to PSRAM
+  if (!psramFound()) {
+      Serial.println("Actual PSRAM hardware failure!");
+      while (1);
+  }
+  Serial.printf("PSRAM Active! Total Free: %d bytes\n", ESP.getFreePsram());
 
   Serial.println("BatMan5T Starting... ");
+  Serial.println("Starting Arduino BLE Client application...");
+  BLEDevice::init("");
+  clientCallbacks = new MyClientCallback();
 
   String LVGL_Arduino = String('V') + lv_version_major() + "." + lv_version_minor() + "." + lv_version_patch();
   Serial.println(LVGL_Arduino);
@@ -415,7 +502,7 @@ void setup() {
 
 #ifdef PIN_NUM_LCD_BL
   ledcAttach(PIN_NUM_LCD_BL , LEDC_FREQ, LEDC_TIMER_10_BIT);
-  ledcWrite(PIN_NUM_LCD_BL , (1 << LEDC_TIMER_10_BIT) / 100 * 80);
+  setLcdBacklight(true);
 #endif
 
   // Init touch device
@@ -469,6 +556,9 @@ void setup() {
 
     /* Initialize QMI8658 */
     qmi8658_timer = lv_timer_create(qmi8658_callback, 1000, NULL);
+    analogReadResolution(12);
+    analogSetAttenuation(ADC_11db);
+    updateBatteryDisplay();
 
     /* Initialize BatMan */
     preferences.begin("batman_lcd", false);
@@ -480,8 +570,6 @@ void setup() {
     Serial.print("Daily meter: ");
     Serial.println(int32_mWH00Day);
 
-    Serial.println("Starting Arduino BLE Client application...");
-    BLEDevice::init("");
     // Retrieve a Scanner and set the callback we want to use to be informed when we
     // have detected a new device.  Specify that we want active scanning and start the
     // scan to run for 15 seconds.
@@ -490,12 +578,65 @@ void setup() {
     pBLEScan->setInterval(1349);
     pBLEScan->setWindow(449);
     pBLEScan->setActiveScan(true);
+
+    if (wokeFromLcdOffSleep) {
+      allowReScan = true;
+      nextScanAt = millis() + 100;
+      Serial.println("Woke from LCD-off sleep; BLE scan scheduled.");
+    }
   }
 
   Serial.println("Setup done");
+  lastPrintDataAt = millis();
+  lastUiActivityAt = millis();
+}
+
+void enterDeepSleepIfIdle() {
+  const uint32_t now = millis();
+  const bool noBleDataTimeout = now - lastPrintDataAt >= PRINT_DATA_TIMEOUT_MS;
+  const bool lcdOffTimeout = !lcdBacklightOn
+    && now - lcdBacklightOffAt >= LCD_DEEP_SLEEP_TIMEOUT_MS;
+  const bool sleepForLcdOff = lcdOffTimeout && !noBleDataTimeout;
+
+  if (!noBleDataTimeout && !lcdOffTimeout) {
+    return;
+  }
+
+  if (sleepForLcdOff) {
+    Serial.println("LCD off for 60 seconds; saving preferences and entering deep sleep.");
+  } else {
+    Serial.println("No battery data for 30 seconds; saving preferences and entering deep sleep.");
+  }
+  pinMode(BTN_BUILDIN, INPUT_PULLUP);
+  if (digitalRead(BTN_BUILDIN) == LOW) {
+    Serial.println("Deep sleep cancelled: BTN_BUILDIN is already active.");
+    lastPrintDataAt = millis();
+    return;
+  }
+
+  Serial.printf("BTN_BUILDIN before sleep: %d\n", digitalRead(BTN_BUILDIN));
+  esp_sleep_enable_ext0_wakeup((gpio_num_t)BTN_BUILDIN, 0);
+  // Retain the active-high input level and pull-up when GPIO0 switches to RTC
+  // control; the digital GPIO API is not valid after this hand-off.
+  rtc_gpio_pullup_en((gpio_num_t)BTN_BUILDIN);
+  rtc_gpio_pulldown_dis((gpio_num_t)BTN_BUILDIN);
+  rtc_gpio_hold_en((gpio_num_t)BTN_BUILDIN);
+  delay(100);
+
+  preferences.putUInt("mWH00Day", int32_mWH00Day);
+  preferences.end();
+  lastSleepReason = sleepForLcdOff ? SleepReasonLcdOff : SleepReasonNone;
+
+#ifdef PIN_NUM_LCD_BL
+  ledcWrite(PIN_NUM_LCD_BL, 0);
+#endif
+
+  esp_deep_sleep_start();
 }
 
 void loop() {
+
+  enterDeepSleepIfIdle();
 
   if (doConnect == true) {
     if (connectToServer()) {
@@ -505,11 +646,17 @@ void loop() {
       preferences.putUInt("mWH00Day", int32_mWH00Day); //save daily meter
       screen="Home";
       state=0;
+      updateBatteryDisplay();
       lv_scr_load(isPortrait ? ui_Home : ui_HomeLD);
     }
     doConnect = false;
   }
-  if (!connected) {
+  if (disposeClient && pClient != nullptr) {
+    delete pClient;
+    pClient = nullptr;
+    disposeClient = false;
+  }
+  if (!connected && millis() >= nextScanAt) {
     if (allowReScan) {
       allowReScan = false;
       Serial.println("Starting rescan...");
@@ -521,6 +668,7 @@ void loop() {
   }
 
   lv_timer_handler(); /* let the GUI do its work */
+  turnOffLcdIfIdle();
 #if (LV_COLOR_16_SWAP != 0)
   gfx->draw16bitBeRGBBitmap(0, 0, (uint16_t *)disp_draw_buf, gfx->width(), gfx->height());
 #else

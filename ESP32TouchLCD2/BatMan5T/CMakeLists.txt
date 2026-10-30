@@ -8,6 +8,8 @@ SET(SOURCES ui_Home.c
     ui_HomeLD.c
     ui_BatManLD.c
     ui_ResetDailyLD.c
-    ui_BatteryMaxLD.c)
+    ui_BatteryMaxLD.c
+    ui_img_path_png.c
+    ui_img_515824655.c)
 
 add_library(ui ${SOURCES})

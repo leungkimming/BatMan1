@@ -1,0 +1,8 @@
+{
+    "username": "tommykamble",
+    "customer_code": "12860705A",
+    "email": "tommykamble@gmail.com",
+    "phone": "",
+    "company": "",
+    "license": "dXNlcm5hbWV8Y3VzdG9tZXJfY29kZXxlbWFpbHxwaG9uZXxjb21wYW55,psbZxhTr8ZaDLKgZ6mK5hcHgcne+YYS6ROXCgdYWLD3v6oA7wR6MzAcKEB5eKZf//6v3OoMczrlWzb5e6b4UN2iBalBVZmvfmOQ9gEuwjfuZA1drkCoVcv+cxiP/OSlig5I8+B6ng8nnnfTeWhcMUVMrmks6x4rZ0mQcGca2qvI="
+}

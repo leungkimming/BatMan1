@@ -42,6 +42,10 @@ extern "C" {
 
 extern lv_obj_t * ui____initial_actions0;
 
+// IMAGES AND IMAGE SETS
+LV_IMG_DECLARE(ui_img_path_png);    // assets/Path.png
+LV_IMG_DECLARE(ui_img_515824655);    // assets/electric-wheelchair.png
+
 // UI INIT
 void ui_init(void);
 void ui_destroy(void);
